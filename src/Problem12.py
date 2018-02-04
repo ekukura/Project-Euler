@@ -125,7 +125,7 @@ print("result is:", tri_num)
 
 
 #print(getSmallestNonOneFactor(71))
-
+#comments
 
 
 '''
