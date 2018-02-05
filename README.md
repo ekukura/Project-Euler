@@ -1,3 +1,3 @@
 # Project-Euler
-Solutions to Project Euler Problems
-see https://projecteuler.net/ for information about Project Euler
+Solutions to Project Euler Problems. 
+See https://projecteuler.net/ for information about Project Euler
