@@ -22,10 +22,7 @@ def collatz(n): #one step of collatz sequence
         return int(n/2)
     else:
         return 3 * n + 1
-    
-    
-    
-
+     
 def collatz_seq(n):
     seq = [n]
     cur_num = n
@@ -77,50 +74,22 @@ def build_collatz(max_n):
         #print()
 
     return c,n
+ 
+if __name__ == '__main__':   
+    start = time.time()
     
-start = time.time()
+    n = 1000000
+    my_c, my_n = build_collatz(n)
+    max_len = max(my_n)
+    index_of_max = my_n.index(max_len)
 
-n = 1000000
-my_c, my_n = build_collatz(n)
-max_len = max(my_n)
-index_of_max = my_n.index(max_len)
-print("max length is", max_len)
-print("index of max is:", index_of_max)
-
-end = time.time()
-print("Took", round(end-start,6), "seconds")
-
-
-'''
-for j in range(n + 1):
-    print(my_c[j])
-    print(my_n[j])
-#'''
+    end = time.time()
     
-
-'''
-a = [1,4,19,2]
-print(a.index(2))
-b = [2,3,4]
-a.extend(b)
-print(a)
-
-
-d = {1:1, 2:2, 5:3}
-print(d)
-d[6] = 2
-print(d)
-
-'''
-
-#d ={1:1, 2:2, 3:3, 10:3, 5:3, 8:3, 4:3, 12:18}
-#print(18 in d) #False
-#print(12 in d) #True
-
-#print(collatz(3))
-#print(collatz_seq(3))
-
-#a = [1,2,3,4]
-#s = a[1:]
-#print(s)
+    print("max length is", max_len)
+    print("index of max is:", index_of_max)
+    print("Took", end-start, "seconds")
+    
+    #print(collatz(3))
+    #print(collatz_seq(3))
+    #Answer: 837799
 
