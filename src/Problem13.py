@@ -5,10 +5,12 @@ Created on Thu Oct  5 09:45:14 2017
 
 @author: emilykukura
 
-Work out the first ten digits of the sum of the following one-hundred 50-digit numbers.
+Work out the first ten digits of the sum of the following 
+one-hundred 50-digit numbers.
 
 """
 import math
+import numpy as np
 
 nums = [37107287533902102798797998220837590246510135740250,
         46376937677490009712648124896970078050417018260538,
@@ -112,15 +114,19 @@ nums = [37107287533902102798797998220837590246510135740250,
         53503534226472524250874054075591789781264330331690]
 
 
-#print(len(nums))
-curNum = nums[99]
-
+#I did things in 'reverse' as the notation of 
+#the problem statement, i.e.
+#by convention here, the n-th digit
+#is actually digit in the 10^(n-1)'s place,
+#e.g. the 1st digit is in the ones place,
+#the second in the 10's place, etc.
+#and in a 50-digit number, the 50-th digit is 
+#the front digit, e.g. in the number 
+#nxxx...xxx it is n
 def get_nth_digit(num, n):
     remainder = num % pow(10, n-1)
     truncated_part = num % pow(10, n)
     digit = int((truncated_part - remainder)/pow(10,n-1))
-    #early_part = int((num - remainder)/pow(10,n-1))
-    #digit = early_part % 10
     return digit
 
 
@@ -128,26 +134,58 @@ def get_nth_digit_sums(arr, n):
     return sum([get_nth_digit(arr[i], n) for i in range(len(arr))])
 
 
-def get_first_m_digits_of_sum(arr, m):
+#On the n-th iteration of the loop 
+#in get_first_m_digits_of_sum, at most 
+#the digit in the n-1-th place increases by one--
+#so on iteration n (if n>m) if the n-1-th digit from the front
+#is < 9 then we are done (assuming all prior digits 
+#(digits up to n-2-nd place) are equal).
+def are_done(old_sum, new_sum, n, length):
+    #need to test m-digits
+    done = True
+    if get_nth_digit(new_sum, length-(n-1)) == 9:
+        done = False
+    else:
+        for i in np.arange(length, length-(n-1), -1):
+            #print("i = {}".format(i))
+            #print(get_nth_digit(old_sum,int(i)), get_nth_digit(new_sum,int(i)))
+            if not get_nth_digit(old_sum,int(i)) == get_nth_digit(new_sum,int(i)):
+                done = False
+            #print(done)
+    return done
+    
+
+def get_first_m_integers_of_sum(arr, m):
     power = math.ceil(math.log(arr[0], 10))
     print(power)
     digit_sums = [get_nth_digit_sums(nums, j) for j in range(1,power+1)]
     print(digit_sums)
     cur_sum = 0
-    i = power - 1
-    while i >= power - (m+3):
-        cur_sum += digit_sums[i] * pow(10, i)
-        print(50-i + 2, cur_sum)
-        i -= 1
-    return 0
 
-get_first_m_digits_of_sum(nums,10)
+    j = 1
+    done = False
+    while not done and j <= power:
+        cur_digit = power-j+1
+        old_sum = cur_sum
+        cur_sum += digit_sums[cur_digit-1] * pow(10, cur_digit-1)
+        print("j = {}, sum = {}".format(j, cur_sum))
+        #check if done here by comparing old, new, and iteration #
+        if j > m:
+            if are_done(old_sum, cur_sum, j, math.ceil(math.log(cur_sum, 10))):
+                done = True
+            else:
+                j+=1
+        else:
+            j+=1
+            
+    return cur_sum
 
-
-
+if __name__ == '__main__':
     
+    m = 10
+    res = get_first_m_integers_of_sum(nums,m)
+    res_str = str(res)
+    print("\n", res_str[:m])
+    #Answer 5537376230
     
-'''
-test = [123, 444, 234]
-a = sum([get_nth_digit(test[i], 2) for i in range(len(test))])    
-#'''       
+          
