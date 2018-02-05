@@ -30,7 +30,6 @@ def get_multiples_sum(factor, N):
     return factor*cum_sum(math.floor((N)/factor))
 
 if __name__ == '__main__':
-    #testing...
     print(cum_sum(3))
     M = 1000
     start = time.time()
