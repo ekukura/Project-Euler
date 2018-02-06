@@ -82,8 +82,8 @@ def solution_2():
 # brute force/recursion
 # (simplified)
 ##########################
-#could make this even faster by using a dictionary to store previouly calculated 
-#g(n) values, or do dynamically instead of recursively
+#could make this even faster by using a dictionary to store previously calculated 
+#g(n) values, or do dynamically instead of recursively (see solution 3)
  
     i = 0
     mySum = 0
