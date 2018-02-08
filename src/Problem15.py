@@ -12,7 +12,7 @@ in 20x20 grid
 import math, time
 
 #simple solution using combinatorics
-def lattice(n,m):
+def solution_1(n,m):
     #n is width, m is height, assume want to go from top left to bottom right
     #need n rights, m downs out of (n+m) total moves
     #so (n+m) choose n (or choose m)
@@ -20,15 +20,20 @@ def lattice(n,m):
     res = math.factorial(n+m)/(math.factorial(m)*math.factorial(n))
     return int(res)
 
-#recursive solutions
-def lattice2(n,m):
-    #print("lattice 2 called with n = ", n, "and m = ", m)
+######################
+# recursive solutions
+######################
+
+# If you move 1 step right along the lattice, then to travel remainder need solution_2(n-1,m) 
+# Similarly, if you move 1 step down along the lattice, then to travel remainder need solution_2(n,m-1) 
+def solution_2(n,m):
     if n == 0 or m == 0:
         return 1
     else:
-        return lattice2(n-1,m) + lattice2(n,m-1)
+        return solution_2(n-1,m) + solution_2(n,m-1)
     
-def lattice3(n,m):
+#recursive solution from two steps out instead of 1 step out like in solution_2
+def solution_3(n,m):
     if n == 0 or m == 0:
         return 1
     elif n == 1:
@@ -36,47 +41,48 @@ def lattice3(n,m):
     elif m == 1:
         return n
     else:
-        return lattice2(n-2,m) + lattice2(n,m-2) + 2*lattice(n-1, m-1)
+        return solution_3(n-2,m) + solution_3(n,m-2) + 2*solution_3(n-1, m-1)
     
-def lattice4(n,m,d):
-    #print("lattice 2 called with n = ", n, "and m = ", m)
-    #print("at beginning of execution, n =", n, "m = ", m, "and d = ", d, "\n")
+#the same as solution_2 except keeps track of knowledge its already obtained in dictionary d
+def solution_4(n,m,d):
     if n == 0 or m == 0:
         return 1
     elif (n,m) in d:
         return d[(n,m)]
     else:
-        d[(n,m)]= lattice4(n-1, m, d) + lattice4(n , m-1, d)
+        d[(n,m)]= solution_4(n-1, m, d) + solution_4(n , m-1, d)
         return d[(n,m)]
 
-'''
-d = {(0,0):1, (0,1):1, (1,0):1}
-print(d)
-print(d[(0,1)])
-'''
-
-n = 40
-m = n
-start = time.time()
-print(lattice(n,m))
-print("took", time.time()-start, "seconds")
-
-d = {}
-start = time.time()
-print(lattice4(n,m,d))
-print("took", time.time()-start, "seconds")
-
-'''
-start = time.time()
-print(lattice3(n,n))
-print("took", time.time()-start, "seconds")    
-'''
-
-'''
-start = time.time()
-print(lattice2(n,m))
-print("took", time.time()-start, "seconds")
-'''
 
 
-
+if __name__ == '__main__':   
+    
+    n = 20
+    m = n
+    
+    start = time.time()
+    res_1 = solution_1(n,m)
+    end = time.time()
+    print("res_1 = {}\nTook {} seconds".format(res_1, end-start)) 
+    
+    ''' takes too long for n = m >= 13 (at n = m = 13, ~4 seconds)
+    start = time.time()
+    res_2 = solution_2(n,m)
+    end = time.time()
+    print("res_2 = {}\nTook {} seconds".format(res_2, end-start))  
+    #'''
+    
+    ''' takes too long for n = m >= 17 (at n = m = 17, ~4 seconds)
+    start = time.time()
+    res_3 = solution_3(n,m)
+    end = time.time()
+    print("res_3 = {}\nTook {} seconds".format(res_3, end-start)) 
+    #'''
+    
+    d = {}
+    start = time.time()
+    res_4 = solution_4(n,m,d)
+    end = time.time()
+    print("res_4 = {}\nTook {} seconds".format(res_4, end-start))  
+        
+    #Answer: 137846528820
