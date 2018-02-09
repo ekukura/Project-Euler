@@ -167,7 +167,7 @@ if __name__ == '__main__':
     end = time.time()
     print("res_4 = {}\nTook {} seconds".format(res_4, end-start))  
            
-   # Answer: 1366
+    # Answer: 1366
 
     
     
