@@ -20,24 +20,20 @@ Evaluate the sum of all the amicable numbers under 10000.
 import math, time
 
 def get_divisor_exponent(num, divisor):
-    if num % divisor == 0:
-        cur_exp = 1
-        num = int( num / divisor )
-        while num % divisor == 0:
-            cur_exp += 1
-            num = int (num / divisor)
-        
-        return cur_exp
+
+    cur_exp = 0
+    while num % divisor == 0:
+        cur_exp += 1
+        num = int (num / divisor)
     
-    else:
-        return 0
+    return cur_exp
+    
     
 def getSmallestNonOneFactor(k):
     if k == 1:
         return -1
     
     max_min_divisor = int(math.floor(math.sqrt(k)))
-    #print(max_min_divisor)
     p = 2
     divisorFound = False
     
@@ -52,12 +48,14 @@ def getSmallestNonOneFactor(k):
     if divisorFound:
         return p
     else:
-        return k
+        return k #if no divisor found, then k is prime so its only factors are 1 and k
+    
     
 def factor(k):
     factors_remain = True    
     remaining_num = k
-    my_factors = {}
+    my_factors = {} #dictionary which contains the prime factors of k along with their orders
+    #in the prime factorization of k
     
     while factors_remain:
         next_factor = getSmallestNonOneFactor(remaining_num)
@@ -73,31 +71,6 @@ def factor(k):
         
     return my_factors
 
-### the below is incorrect
-'''
-def get_prime_factors(n):
-    
-    prime_factors = dict()
-    max_possible_prime_factor = int(math.floor(math.sqrt(n)))
-    print(max_possible_prime_factor)
-    cur_factor = 2;
-    cur_num = n
-    
-    while cur_factor <= max_possible_prime_factor and cur_num > 1:
-        print("cur_num is:", cur_num)
-        exp = get_divisor_exponent(cur_num, cur_factor)
-        print("The exponent for {} is {}".format(cur_factor, exp))
-        if exp > 0:
-            prime_factors[cur_factor] = exp
-            cur_num = int( cur_num / math.pow(cur_factor, exp) )
-        if cur_factor == 2:
-            cur_factor += 1
-        else:
-            cur_factor += 2
-        
-        
-    return prime_factors
-'''    
 
 def get_all_divisors(factor_dict):
     cur_factor, cur_exponent = factor_dict.popitem()
@@ -106,16 +79,16 @@ def get_all_divisors(factor_dict):
         divisor_set = {int(math.pow(cur_factor, power)) for power in range(cur_exponent + 1)}
             
     else:
-    
         remaining_divisors = get_all_divisors(factor_dict)
         
-        divisor_set = set(remaining_divisors)
+        divisor_set = set(remaining_divisors) #divisor_set is a new copy of remaining_divisors set
         for power in range(1, cur_exponent + 1):
             multiplier = int(pow(cur_factor, power))
             mult_set = {multiplier * el for el in remaining_divisors}
             divisor_set = set.union(divisor_set, mult_set)
         
     return divisor_set
+
 
 def d(n): #finds sum of proper divisors of n
     #factorize n, then take all possible combinations 
@@ -126,12 +99,15 @@ def d(n): #finds sum of proper divisors of n
     return sum(divisor_set)
 
  
-#note if (a,b) amicable pair, than (a,c) and (c,b) NOT amicable for any c
+# returns set of amicable numbers <= L
+# note if (a,b) amicable pair, then (a,c) and (c,b) NOT amicable for any c (c != a,b)
+# since d(a) = b and d(b) = a. Thus if b is an amicable mate to a, then we can remove b 
+# from further consideration as a mate of any other number 
 def amicable_numbers(L):
-    #for a=1:L
-    #find d(a) = n and try d(n). If n hasn't already been eliminated from eligible amicable numbers,
-    #compute d(n) and if d(n) = a, add a and n to amicable pairs; remove
-    #n from set to try; increment a
+    #for a=2:L
+    #find d(a) = n and try d(n). If n hasn't already been eliminated from eligible 
+    #amicable numbers, compute d(n) and if d(n) = a, add a and n to amicable pairs; 
+    #remove n from set to try; increment a
     candidates = {i for i in range(2,L+1)}
     amicable_numbers = set()
     
@@ -140,96 +116,48 @@ def amicable_numbers(L):
         cur_eligible_mate = d(cur_candidate)
         if cur_eligible_mate in candidates and cur_candidate == d(cur_eligible_mate):
             amicable_numbers = set.union(amicable_numbers, {cur_candidate, cur_eligible_mate})
-            candidates.remove(cur_eligible_mate)
-            
+            candidates.remove(cur_eligible_mate)          
 
     return amicable_numbers
 
-num = 10000
 
-start = time.time()
-am_nums = amicable_numbers(num)
-res = sum(am_nums)
-end = time.time()
+def solution_1(num):
+    am_nums = amicable_numbers(num)
+    res = sum(am_nums)
+    return res, am_nums
 
-print("The amicable numbers under {} are \n{}.\nTheir sum is {}\n".format(num, am_nums, res))
-print("Took {} seconds".format(end-start))
-
-#print(d(220))
-#print(d(284))
-
-
-'''
-For example, the proper divisors of 220 are 
-1, 2, 4, 5, 10, 11, 20, 22, 44, 55 and 110; therefore d(220) = 284. 
-The proper divisors of 284 are 1, 2, 4, 71 and 142; so d(284) = 220.
-'''
-
-#'''
-n = 220
-prime_factors = factor(n)
-print("\nThe prime factors of {} are:\n{}\n".format(n, prime_factors))
-divisor_set = get_all_divisors(prime_factors)
-print("The divisors of {} are:\n{}\n".format(n, sorted(divisor_set)))
-res = sum(divisor_set) - n
-print("res = ", res)
-
-
-m = 284
-#prime_factors = get_prime_factors(m)
-prime_factors = factor(m)
-print("\nThe prime factors of {} are:\n{}\n".format(m, prime_factors))
-divisor_set = get_all_divisors(prime_factors)
-print("The divisors of {} are:\n{}\n".format(m, sorted(divisor_set)))
-res = sum(divisor_set) - m
-print("res = ", res)
-
-#'''
-
-
-
-
-'''
-l = {3:5, 4:2}
-k1, v1 = l.popitem()
-print(l)
-k2, v2 = l.popitem()
-print(l)
-print(len(l))
-#'''
-
-
-
-'''
-print(math.pow(2,3)*math.pow(3,2)*5*math.pow(7,4))
-res = get_prime_factors(864360)
-print(res)
-k,v = res.popitem()
-#a = res.pop(2)
-print(res)
-print(k,v)
-new_dict = dict(res)
-print(new_dict)
-#'''
-
-
-
-'''
-my_set = {1,3,7}
-a = my_set.pop()
-print(a)
-print(my_set)
-my_set.remove(7)
-print(my_set)
-my_set.add(6)
-print(my_set)
-my_set = set.union({8,17}, my_set)
-print(my_set)
-print(17 in my_set)
-new_set = set(my_set)
-print("new set is:\n", new_set)
-factor_set = {3*el for el in new_set}
-print(factor_set)
-
-#'''
-
+if __name__ == '__main__':
+    
+    num = 10000
+    
+    start = time.time()
+    res, am_nums = solution_1(num)
+    end = time.time()   
+    print("The amicable numbers under {} are \n{}.\nTheir sum is {}\n".format(num, am_nums, res))
+    print("Took {} seconds".format(end-start))
+    
+    # Answer: 31626
+    
+    '''
+    print(d(220))
+    print(d(284))
+    
+    n = 220
+    prime_factors = factor(n)
+    print("\nThe prime factors of {} are:\n{}\n".format(n, prime_factors))
+    divisor_set = get_all_divisors(prime_factors)
+    print("The divisors of {} are:\n{}\n".format(n, sorted(divisor_set)))
+    res = sum(divisor_set) - n
+    print("res = ", res)
+    
+    m = 284
+    #prime_factors = get_prime_factors(m)
+    prime_factors = factor(m)
+    print("\nThe prime factors of {} are:\n{}\n".format(m, prime_factors))
+    divisor_set = get_all_divisors(prime_factors)
+    print("The divisors of {} are:\n{}\n".format(m, sorted(divisor_set)))
+    res = sum(divisor_set) - m
+    print("res = ", res)
+    
+    #'''
+    
