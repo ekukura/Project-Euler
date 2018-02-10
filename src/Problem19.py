@@ -18,25 +18,8 @@ during the twentieth century (1 Jan 1901 to 31 Dec 2000)?
 -Jan 1 1901 a Tuesday
 -> Jan 6 1901 a Sunday
 """
-color = {
-    'white':    "\033[1;37m",
-    'yellow':   "\033[1;33m",
-    'green':    "\033[1;32m",
-    'blue':     "\033[1;34m",
-    'cyan':     "\033[1;36m",
-    'red':      "\033[1;31m",
-    'magenta':  "\033[1;35m",
-    'black':      "\033[1;30m",
-    'darkwhite':  "\033[0;37m",
-    'darkyellow': "\033[0;33m",
-    'darkgreen':  "\033[0;32m",
-    'darkblue':   "\033[0;34m",
-    'darkcyan':   "\033[0;36m",
-    'darkred':    "\033[0;31m",
-    'darkmagenta':"\033[0;35m",
-    'darkblack':  "\033[0;30m",
-    'off':        "\033[0;0m"
-}
+
+import time
 
 def count_first_sundays():
     count = 0
@@ -64,7 +47,7 @@ def count_first_sundays():
         for month in range(1,13):
             #print("\nmonth is", month)
             #print("curr_day is", curr_day)
-            if curr_day == 0:
+            if curr_day == 0: #0 corresponds to "Sunday" in day dict
                 count += 1          
         
             #print("count is:", count)
@@ -72,6 +55,15 @@ def count_first_sundays():
         
     return count
 
-res = count_first_sundays()
-print("\nThere were", res, "Sundays on the first of the month" +
-      "in the 20th century.")
+def solution_1():
+    return count_first_sundays()
+
+if __name__ == '__main__':   
+    
+    start = time.time()
+    res_1 = solution_1()
+    end = time.time()
+    print("res_1 = {}\nTook {} seconds".format(res_1, end-start))  
+
+    # Answer: 171
+
