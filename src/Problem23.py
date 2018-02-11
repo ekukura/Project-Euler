@@ -23,7 +23,7 @@ Find the sum of all the positive integers which cannot be written as the sum of 
 abundant numbers.
 
 """
-import math, time
+import math, time, itertools
 
 #assumed divisor IS divisor of num
 def get_divisor_exponent(num, divisor) :
@@ -118,6 +118,54 @@ def isAbundant(candidate):
         return False
 
 
+#return all abundant numbers <= limit
+def get_all_abundants(limit):
+    abundants = set()
+    for i in range(12,limit+1): #since 12 is smallest abundant sum
+        #print("\ni = {}:".format(i))
+        if isAbundant(i):
+            #print("{} is abundant\n".format(i))
+            abundants = set.union(abundants, {i})
+    return abundants
+
+
+# Improvement on get_all_abundants
+# Thoughts for improvement:
+# It's true that isAbundant(n) -> isAbundant(k*n) for any integer k>=1
+# And we can use this to improve the get_all_abundants function
+
+# Let factors(n) = {f1, f2, ... , f_d(n), f_[d(n)+1]} be the factors of n, 
+# in increasing order (so f_[d(n)+1] = n). 
+
+# Assume d(n) > n.
+# Then factors((p^a)*n) = union(p^j * {f1, f2, ... , f_d(n), f_[d(n)+1]}) for j = 0..a)
+# So since d(m) = sum(factors(m)) - m, we have:
+#
+# d((p^a)*n) = sum(p^j * sum(factors(n)), j = 0...a) - (p^a)*n
+#            = sum(factors(n) * sum(p^j, j = 0...a) - (p^a)*n
+#            = (d(n) + n) * sum(p^j, j = 0...a) - (p^a)*n
+#            > 2*n*sum(p^j, j = 0...a) - (p^a)*n
+#            > 2*p^a*n - (p^a)*n = (p^a)*n
+# 
+# However, function below is actually SLOWER
+def get_all_abundants_2(limit):
+    abundants = set()
+    candidates = {i for i in range(12, limit+1)}
+    i = 1
+    while i <= limit and len(candidates) > 0: #since 12 is smallest abundant sum
+        #print("\ni = {}:".format(i))
+        i = min(candidates)
+        candidates.remove(i)
+        if isAbundant(i):
+            #print("{} is abundant\n".format(i))
+            #get all multiples k*i s.t. k*i <= limit, and remove them
+            mult_set = {k*i for k in range(1, int(math.floor(limit/i)) + 1)}
+            candidates = candidates - mult_set
+            abundants = set.union(abundants, mult_set)           
+            
+    return abundants
+
+
 #returns True if target_sum can be as sum of two numbers from
 #component_set, and False otherwise
 def set_two_summable(target_sum, component_set):
@@ -133,34 +181,37 @@ def set_two_summable(target_sum, component_set):
     return sum_found
 
 
-#return all abundant numbers <= limit
-def get_all_abundants(limit):
-    abundants = set()
-    for i in range(12,limit+1): #since 12 is smallest abundant sum
-        #print("\ni = {}:".format(i))
-        if isAbundant(i):
-            #print("{} is abundant\n".format(i))
-            abundants = set.union(abundants, {i})
-    return abundants
-
-
 #returns all non-abundant sums <= limit
 def get_non_abundant_sums(limit):
     non_abundant_sums = {1}
-    abundant_sums = get_all_abundants(limit)
+    abundants = get_all_abundants(limit)
     #print(abundant_sums)
     for i in range(2,limit+1):
-        is_two_summable = set_two_summable(i , abundant_sums)
+        is_two_summable = set_two_summable(i , abundants)
         if not is_two_summable:
             non_abundant_sums = set.union(non_abundant_sums, {i})
     
     return non_abundant_sums
 
 
+#returns all non-abundant sums <= limit
+def get_non_abundant_sums_2(limit):
+
+    candidates = {i for i in range(limit+1)}
+    abundants = get_all_abundants(limit)
+    #Get direct sum of abundant_sums with itself
+    abundant_two_sums = {a+b for (a,b) in itertools.product(abundants, abundants)}
+    #Then take all numbers <= limit which are NOT in this list
+    return candidates - abundant_two_sums
 
 
 def solution_1(num):
-    non_abundant_sums = sorted(get_non_abundant_sums(num))
+    non_abundant_sums = get_non_abundant_sums(num)
+    #print("\nThe non-abundant sums are:\n")
+    return sum(non_abundant_sums)
+
+def solution_2(num):
+    non_abundant_sums = get_non_abundant_sums_2(num)
     #print("\nThe non-abundant sums are:\n")
     return sum(non_abundant_sums)
 
@@ -177,13 +228,23 @@ if __name__ == '__main__':
     #print(isAbundant(1976))
     #print(d(1976))
     #print(get_all_abundants(num - 1))
-    print(isAbundant(220))
     
+    #A = {1,2,3}
+    #dir_sum = {a+b for (a,b) in itertools.product(A,A)}
+    #print(dir_sum)
+        
     start = time.time()
     res_1 = solution_1(num)
     end = time.time()
-    print("res_1 = {}\nTook {} seconds".format(res_1, end-start))  
-        
+    print("res_1 = {}\nTook {} seconds".format(res_1, end-start))   
+    # time ~ 10.95 s
+    
+    start = time.time()
+    res_2 = solution_2(num)
+    end = time.time()
+    print("res_2 = {}\nTook {} seconds".format(res_2, end-start))  
+    # time ~ 6.41 s
+    
     # Answer: 4179871
 
 
