@@ -28,24 +28,23 @@ What is the index of the first term in the Fibonacci sequence to
 contain 1000 digits?
 """
 
-import time
-import numpy as np
+import time, math
 
 
-def rec_fib(n):
-    if n == 1:
+def rec_fib(m):
+    if m == 1:
         return 1
-    elif n == 2:
+    elif m == 2:
         return 1
     else:
-        return rec_fib(n-1)+rec_fib(n-2)
+        return rec_fib(m-1)+rec_fib(m-2)
     
-def dyn_fib(n):
+def dyn_fib(m):
     d = {1:1, 2:1}
-    if n > 2:
-        for i in range(3, n+1):
+    if m > 2:
+        for i in range(3, m+1):
             d[i] = d[i-1] + d[i-2]
-    return d[n]
+    return d[m]
 
 def dyn_fib2(n,d = None):
     if d == None or len(d) < 2:
@@ -57,58 +56,147 @@ def dyn_fib2(n,d = None):
     else:
         for i in range(max_calculated+1, n+1):
             d[i] = d[i-1] + d[i-2]
+            
     return d[n], d
 
-#return the index of the first fib. number with length n
-def g(n):
-    d = None
+
+#fibCalculator is some method which maps n->fibonacci(n) 
+#This uses a bisecting search over the indices
+def bisection_search(n, fibCalculator, d = None):
+    ind = 0
+    lower_ind = 0
+    upper_ind = None
+    #divide and conquer approach
+    found = False
+    while not found: #need max_len = n
+        if upper_ind == None: #increment until can find upper bound
+            ind += int(math.floor(n/2))
+        else:
+            ind = lower_ind + int(math.floor((upper_ind - lower_ind)/2)) #look halfway between uper and lower bound
+         
+        #print("calculating ind = {}".format(ind)) 
+        if d:
+            res, d = fibCalculator(ind, d)  
+        else:
+            res = fibCalculator(ind)
+            
+        cur_len = len(str(res))
+
+        if cur_len < n:
+            if upper_ind: #if here, HAVE found a fib. # w/ len >= n
+                if upper_ind - lower_ind == 1: #if here, then done since upper_ind must be smallest ind s.t. len(fib(ind)) = n
+                    found = True
+                    ind = upper_ind
+                else:
+                    lower_ind = ind
+            else:
+                lower_ind = ind
+                
+        else: #cur_len >= n
+            if upper_ind:
+                if upper_ind - lower_ind == 1:
+                    found = True
+                else:
+                    upper_ind = ind
+            else:
+                upper_ind = ind
+        
+        #print("ind = {}, cur_len = {}\nlower_ind = {}, upper_ind = {}".format(
+        #            ind, cur_len, lower_ind, upper_ind))
+        
+    return ind
+
+#fibCalculator is some method which maps n->fibonacci(n) 
+#this uses a simple incrementing search over the indices
+def increment_search(n, fibCalculator, d = None):
     ind = 0
     max_len = 0
     while max_len < n:
         ind += 1
-        #print("\nind = ", ind )
-        res, d = dyn_fib2(ind, d)
-        #print("res = ", res)
+
+        if d:
+            res, d = fibCalculator(ind, d)  
+        else:
+            res = fibCalculator(ind)
+
         max_len = len(str(res))
-    
-    return ind, max_len
-#num = 28
+        #print(ind, max_len)
+        
+    return ind
 
 
-#'''
-num = 1000
-start = time.time()
-res = g(num)
-end = time.time()
-print("\nres = {}. Took {} seconds.\n".format(res, end-start))
-#'''
 
-"""
-nums = [pow(2,i) for i in range(5,10)]
-d = None
-for num in nums:
+def solution_1(n):
+    return increment_search(n, rec_fib)
 
-    print("\nnum = ", num)  
-    print("--------------")
+def solution_2(n):
+    return increment_search(n, dyn_fib)
+
+def solution_3(n):
+    return bisection_search(n, rec_fib)
+
+def solution_4(n):
+    return bisection_search(n, dyn_fib)
+
+def solution_5(n):
+    d = {1:1, 2:1}   
+    return increment_search(n, dyn_fib2, d)
+
+#below is best solution, uses dictionary and bisection
+def solution_6(n):
+    d = {1:1, 2:1}   
+    return bisection_search(n, dyn_fib2, d)
+
+if __name__ == '__main__':
     
-    '''
-    start1 = time.time()
-    res1 = rec_fib(num)
-    end1 = time.time()
-    print("\nres = {}. Took {} seconds.\n".format(res1, end1-start1))
-    '''
+    #num = 10
+    num = 1000 
     
-    '''
-    start2 = time.time()
-    res2 = dyn_fib(num)
-    end2 = time.time()
-    print("res = {}.\nTook {} seconds.".format(res2, end2-start2))
-    '''
+    # The recursive Solutions 1 and 3 are SLOW. Remainder of solutiosn are
+    # dynamic and are WAY getter
     
-    start3 = time.time()
-    res3, d = dyn_fib2(num, d)
-    end3 = time.time()
-    print("res = {}.\nTook {} seconds.".format(res3, end3-start3))
-    print(len(str(res3)))
+    '''Shouldn't do this one for num > 8 (at num = 8 takes ~16.1 s)
+    start = time.time()
+    res1 = solution_1(num)
+    end = time.time()
+    print("\nres = {}. Took {} seconds.\n".format(res1, end-start))
+    #'''
+
+    '''Shouldn't do this one for num > 1000 (at num = 1000 takes ~4.25 s)
+    start = time.time()
+    res2 = solution_2(num)
+    end = time.time()
+    print("\nres = {}. Took {} seconds.\n".format(res2, end-start))
+    #'''
     
-#"""
+    '''Shouldn't do this one for num > 8 (at num = 8 takes ~15.6 s)
+    start = time.time()
+    res3 = solution_3(num)
+    end = time.time()
+    print("\nres = {}. Took {} seconds.\n".format(res3, end-start))
+    #'''
+    
+    #'''Shouldn't do for num > 20,000 (at num = 20000 took ~8.54 seconds)
+    start = time.time()
+    res4 = solution_4(num)
+    end = time.time()
+    print("\nres = {}. Took {} seconds.\n".format(res4, end-start))
+    #'''
+
+    #'''Shouldn't do for num > 4,000 (at num = 4,000 took ~5.87 seconds)
+    start = time.time()
+    res5 = solution_5(num)
+    end = time.time()
+    print("\nres = {}. Took {} seconds.\n".format(res5, end-start))
+    #'''
+    
+    #Shouldn't do for num > 40,000 (at num = 40,000 took ~4.42 seconds)
+    start = time.time()
+    res6 = solution_6(num)
+    end = time.time()
+    print("\nres = {}. Took {} seconds.\n".format(res6, end-start))
+
+    #could try another solution which combines benefits of solutions 4 and 5
+    
+    # Answer: 4782
+    

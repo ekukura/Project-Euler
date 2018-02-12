@@ -21,7 +21,7 @@ import time, math
 '''
 note that since odd + even = odd and odd + odd = even,
 terms go by pattern o e o o e o o e ... etc.
-so that even terms are exactly f(3n+2)'s
+so that even terms are exactly increment_search(3n+2)'s
 '''
 def solution_1():
 ########################
@@ -29,20 +29,20 @@ def solution_1():
 # uses roots of generating function
 ########################
 
-    #fibonnaci function, where f(0) = f(1) = 1, f(2) = 2
-    def f(n):
+    #fibonnaci function, where increment_search(0) = increment_search(1) = 1, increment_search(2) = 2
+    def increment_search(n):
         alpha = (1 + math.sqrt(5))/2
         beta = (1 - math.sqrt(5))/2
         return round((alpha**(n+1)-beta**(n+1))/math.sqrt(5))
 
     i = 2
     mySum = 0
-    curVal = f(2)
+    curVal = increment_search(2)
     done = False
     while not done :
         mySum += curVal
         i += 3
-        curVal = f(i)
+        curVal = increment_search(i)
         if (curVal > 4000000):
             done = True
 
@@ -52,20 +52,20 @@ def solution_1():
 From the Fibonnaci recurrence we can derive a 
 recurrence for even terms:
 
-    f(3n+2) = 4*f(3(n-1)+2) + f(3(n-2)+2)
+    increment_search(3n+2) = 4*increment_search(3(n-1)+2) + increment_search(3(n-2)+2)
 
-So setting g(n) = f(3n+2) we have the recurrence:
+So setting g(n) = increment_search(3n+2) we have the recurrence:
 
     g(n) = 4*g(n-1) + g(n-2)
 
 Derivation:
 -----------
-f(3n+2) = f(3n+1) + f(3n)
-        = f(3n) + 2*f(3n-1) + f(3n-2)
-        = 3*f(3n-1) + f(3n-2) + f(3n-3) + f(3n-4)
-        = 3*f(3n-1) + f(3n-1) + f(3n-4)
-        = 4*f(3n-1) + f(3n-4)
-        = 4*f(3(n-1)+2) + f(3(n-2)+2)
+increment_search(3n+2) = increment_search(3n+1) + increment_search(3n)
+        = increment_search(3n) + 2*increment_search(3n-1) + increment_search(3n-2)
+        = 3*increment_search(3n-1) + increment_search(3n-2) + increment_search(3n-3) + increment_search(3n-4)
+        = 3*increment_search(3n-1) + increment_search(3n-1) + increment_search(3n-4)
+        = 4*increment_search(3n-1) + increment_search(3n-4)
+        = 4*increment_search(3(n-1)+2) + increment_search(3(n-2)+2)
 '''
 
 def g(n):
