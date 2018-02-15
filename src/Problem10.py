@@ -12,39 +12,7 @@ Find the sum of the primes smaller than 2 million.
 
 import math, time
 
-    
-def isPrime1(x):
-    foundComposite = False
-    if x == 2:
-        return True
-    else:   
-        max_divisor = math.floor(math.sqrt(x))
-        
-        pdl = [j for j in range(2, max_divisor+1)]
-        i = pdl[0]
 
-        while i <= max_divisor and not foundComposite:
-
-
-            #testing all possible lower divisors
-            if x % i == 0:
-                foundComposite = True
-            else:
-                max_k = math.floor(max_divisor / i)
-                for k in range(1, max_k + 1):
-                    try:
-                        pdl.remove(k*i)
-                    except:
-                        pass
-                
-                if len(pdl) > 0:
-                    i = pdl[0]
-                else:
-                    i = max_divisor + 1
-                
-                
-        return not foundComposite
-    
 
 def isPrime(x):
     foundComposite = False
@@ -60,7 +28,9 @@ def isPrime(x):
                 foundComposite = True
             i += 1
         return not foundComposite
-
+    
+# determine_primes2 SLOWER than determine_primes1
+# Both the Sieve of Eratosthenes
 def determine_primes2(max_x):
     
     if max_x < 2:
@@ -70,32 +40,33 @@ def determine_primes2(max_x):
     
     max_divisor = math.floor(math.sqrt(max_x))
     
-    #pps = [j for j in range(2, max_x+1)]
+    #pps are all possible primes
     pps = [2]
     pps.extend([2*j+1 for j in range(1, math.floor((max_x+1)/2))])
     prime_index = 1
-    cur_prime = pps[prime_index]
+    cur_poss_prime = pps[prime_index]
 
 
-    while cur_prime <= max_divisor:
-        print(cur_prime)
-        #print(cur_prime)
+    while cur_poss_prime <= max_divisor:
+        print(cur_poss_prime)
+        #print(cur_poss_prime)
         #remove all possible multiples       
-        max_k = math.floor(max_x / cur_prime)
+        max_k = math.floor(max_x / cur_poss_prime)
 
         for k in range(2, max_k + 1):
             try:
-                pps.remove(k*cur_prime)
+                pps.remove(k*cur_poss_prime)
             except:
                 pass
         
         #print(pps)
         prime_index += 1
-        cur_prime = pps[prime_index]
+        cur_poss_prime = pps[prime_index]
        
     return pps
     
 
+# determines all prime numbers <= max_x
 def determine_primes(max_x):
     
     if max_x < 2:
@@ -135,48 +106,25 @@ def sum_primes(max_x):
     return p_sum
 
 if __name__ == '__main__':
-    start = time.time() 
+ 
     max_num = 2000000
     
+    start = time.time() 
     primes = determine_primes(max_num)
     #print(primes)
-    res = sum(primes)
-    print("sum is:", res)
+    res_1 = sum(primes)
+    print("sum is:", res_1)
     print("Took:", round(time.time() - start, 6), "seconds")
-    #sum is: 142913828922
+    
+    ''' Don't do this one for max_num >= 200,000 (at 200,000, takes ~4.16 s)
+    start = time.time() 
+    res_2 = sum_primes(max_num)
+    print("sum is:", res_2)
+    print("Took:", round(time.time() - start, 6), "seconds")
+    #'''
     #Took: 9.498652 seconds
+    #Answer: 142913828922
 
 
 
 
-
-#testing
-'''
-#max_num = 10
-#max_num = 400000
-max_num = 2000000
-res = sum_primes(max_num)
-print(res)
-print("Took:", round(time.time() - start, 6), "seconds")
-#took 76.99175 seconds
-'''
-
-
-
-""" time test
-num = 179426549
-
-start = time.time()
-print(isPrime(num))
-end = time.time()
-time1 = end - start
-print(time1)
-
-print()
-
-start2 = time.time()
-print(isPrime2(num))
-end2 = time.time()
-time2 = end2 - start2
-print(time2)
-"""
