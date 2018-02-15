@@ -29,6 +29,10 @@ the maximum number of primes for consecutive values of n, starting with n=0.
 import math, time
 import numpy as np
 
+# Always want to get smallest divisor not equal to one with this function,
+# but start_p parameter lets you start with a value p = start_p when
+# you know that there is no non-1 divisor < start_p
+# start_p should be <= floor(sqrt(num))
 def get_smallest_non1_divisor(num, start_p):
     if num == 1:
         res = None
@@ -37,7 +41,7 @@ def get_smallest_non1_divisor(num, start_p):
     else:
         max_min_divisor = int(math.floor(math.sqrt(num)))
         divisor_found = False
-        p = 2
+        p = start_p
         while p <= max_min_divisor and not divisor_found:
             if num % p == 0:
                 divisor_found = True
@@ -52,6 +56,7 @@ def get_smallest_non1_divisor(num, start_p):
             res = num
         
     return res
+    
     
 def isPrime(num):
     if num <= 1:
@@ -73,6 +78,7 @@ def isPrime(num):
         
     return res
 
+
 def get_number_consecutive_primes(a,b):
     #n^2 + a * n + b
     composite_found = False
@@ -87,7 +93,7 @@ def get_number_consecutive_primes(a,b):
     return n
 
 #note, even b always divisible at n = 2, so skip
-def get_max_prod(max_a_mod, max_b_mod):
+def solution_1(max_a_mod, max_b_mod):
     
     my_max = 0
     my_prod = 0
@@ -95,30 +101,24 @@ def get_max_prod(max_a_mod, max_b_mod):
     b_max = None
     if max_b_mod % 2 == 0: 
         max_b_mod -= 1
-
-    
+  
     for a in range(-max_a_mod, max_a_mod + 1):
         for b in np.arange(-max_b_mod, max_b_mod + 1, 2):
-           cur_max = get_number_consecutive_primes(a,b)
-           if cur_max > my_max:
-               a_max = a
-               b_max = b
-               my_max = cur_max
-               my_prod = a * b;
+            cur_max = get_number_consecutive_primes(a,b)
+            if cur_max > my_max:
+                a_max = a
+                b_max = b
+                my_max = cur_max
+                my_prod = a * b;
     
     return a_max, b_max, my_max, my_prod
 
+
 #returns largest b value in candidates which does NOT have divisor smaller 
-#than cur_max, and the remaining candidates
-#or None, {} if none such
+#than cur_max, and the remaining candidates,
+#or returns (None, {}) if none such
 def get_next_b_val(max_b_modulus, candidates, cur_max):
-    '''
-    print("initial inputs:")
-    print(max_b_modulus)
-    print(candidates)
-    print(cur_max)
-    print()
-    '''
+
     next_b_found = False
     next_b = None
     while len(candidates) > 0 and not candidates == {1} and not next_b_found:
@@ -127,17 +127,19 @@ def get_next_b_val(max_b_modulus, candidates, cur_max):
         #print("\nb = ", b)
         if b < cur_max: #if reach this state, then there is NO viable b
             candidates = set() 
-            
-        s = get_smallest_non1_divisor(b,2)
-        #print("s = ", s)
-        if s < cur_max: #if s < cur_max, remove s and all its multiples in remaining set
-            candidates = candidates - get_multiples(s, max_b_modulus)  
-            #candidates = candidates - {b} #for good measure--in reality should be accounted for in line above                  
-        else:
-            #print("smallest divisor = ", s)
-            next_b_found = True
-            next_b = b           
-        #print("candidates:\n", candidates)
+        
+        else:    
+            s = get_smallest_non1_divisor(b,2)
+            #print("s = ", s)
+            if s < cur_max: #if s < cur_max, remove s and all its multiples in remaining set
+                candidates = candidates - get_multiples(s, max_b_modulus)  
+                #to make even faster, remove multiples of ANY divisor < cur_max,
+                #not JUST the smallest one       
+            else:
+                #print("smallest divisor = ", s)
+                next_b_found = True
+                next_b = b           
+            #print("candidates:\n", candidates)
         
     return next_b, candidates
     
@@ -146,7 +148,8 @@ def get_multiples(m, max_val):
     max_multiplier = int(math.floor(max_val/m))
     return {m*k for k in range(1, max_multiplier+1)}
 
-def get_optimized_max_prod(max_a_mod, max_b_mod):
+
+def solution_2(max_a_mod, max_b_mod):
     
     my_max = 0
     my_prod = 0
@@ -157,57 +160,61 @@ def get_optimized_max_prod(max_a_mod, max_b_mod):
         
     cand_b_abs = {i for i in np.arange(1, max_b_mod + 1, 2)}
     
-    #stop = False
     b = max(cand_b_abs) #check both + and - of b
     #done once b <= my_max, as then at most b'< b <= my_max consec. primes for all remaining b candidates
-    while not b == None and b > my_max and len(cand_b_abs) > 0: #and not stop:
+    while not b == None and b > my_max and len(cand_b_abs) > 0: 
         #print("b = ", b)
         for a in range(-max_a_mod, max_a_mod + 1):
-           #n_iters = 0
-           cur_max_pos = get_number_consecutive_primes(a,b)
-           cur_max_neg = get_number_consecutive_primes(a,-b)
-           #print("a = ", a)
-           #print(cur_max_pos)
-           #print(cur_max_neg)
+            #n_iters = 0
+            cur_max_pos = get_number_consecutive_primes(a,b)
+            cur_max_neg = get_number_consecutive_primes(a,-b)
+            #print("a = ", a)
+            #print(cur_max_pos)
+            #print(cur_max_neg)
            
-           if max(cur_max_pos, cur_max_neg) > my_max:  
-               if cur_max_pos > my_max:
-                   a_max = a
-                   b_max = b
-                   my_max = cur_max_pos
-                   my_prod = a * b
+            if max(cur_max_pos, cur_max_neg) > my_max:  
+                if cur_max_pos >= cur_max_neg:
+                    a_max = a
+                    b_max = b
+                    my_max = cur_max_pos
+                    my_prod = a * b
                    
-               if cur_max_neg > my_max:
-                   a_max = a
-                   b_max = b
-                   my_max = cur_max_neg
-                   my_prod = a * b    
+                else:# cur_max_neg > cur_max_pos:
+                    a_max = a
+                    b_max = b
+                    my_max = cur_max_neg
+                    my_prod = a * b    
                    
-        cand_b_abs = cand_b_abs - {b}
-        #print(cand_b_abs)       
+        cand_b_abs = cand_b_abs - {b} 
         #print("my_max = ", my_max)
            
-        #to make even faster, remove multiples of ANY divisor < my_max,
-        #not JUST the smallest one
         b, cand_b_abs = get_next_b_val(max_b_mod, set(cand_b_abs), my_max)
            
     return a_max, b_max, my_max, my_prod
 
 
-max_a_val = 999
-max_b_val = 1000
-start = time.time()
-res = get_max_prod(max_a_val, max_b_val)
-end = time.time()
-print("The resulting tuple is (a_max, b_max, my_max, my_prod) = {}.\n"
-      "Took {} seconds".format(res, end-start))
-start2 = time.time()
-res2 = get_optimized_max_prod(max_a_val, max_b_val)
-end2 = time.time()
-print("The resulting tuple is (a_max, b_max, my_max, my_prod) = {}.\n"
-      "Took {} seconds".format(res2, end2-start2))
-
-print()
+if __name__ == '__main__':
+    
+    max_a_val = 999
+    max_b_val = 1000
+    
+    start = time.time()
+    res_1 = solution_1(max_a_val, max_b_val)
+    end = time.time()
+    print("The resulting tuple is (a_max, b_max, my_max, my_prod) = {}.\n"
+          "Took {} seconds".format(res_1, end-start))
+    #Took ~6.32 s
+    
+    start = time.time()
+    res_2 = solution_2(max_a_val, max_b_val)
+    end = time.time()
+    print("The resulting tuple is (a_max, b_max, my_max, my_prod) = {}.\n"
+          "Took {} seconds".format(res_2, end-start))
+    #Took ~3.22 s
+    
+    print()
+    
+    #Answer: -59231
 
 '''
 rs = {1, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47}
@@ -355,3 +362,4 @@ def get_optimized_max_prod3(max_a_mod, max_b_mod):
             
     return a_max, b_max, my_max, my_prod
 '''
+        
