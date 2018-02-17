@@ -24,15 +24,15 @@ def solution_1(n,m):
 # recursive solutions
 ######################
 
-# If you move 1 step right along the lattice, then to travel remainder need solution_2(n-1,m) 
-# Similarly, if you move 1 step down along the lattice, then to travel remainder need solution_2(n,m-1) 
+# If you move 1 step right along the lattice, then to travel remainder need solution_3(n-1,m) 
+# Similarly, if you move 1 step down along the lattice, then to travel remainder need solution_3(n,m-1) 
 def solution_2(n,m):
     if n == 0 or m == 0:
         return 1
     else:
-        return solution_2(n-1,m) + solution_2(n,m-1)
+        return solution_3(n-1,m) + solution_3(n,m-1)
     
-#recursive solution from two steps out instead of 1 step out like in solution_2
+#recursive solution from two steps out instead of 1 step out like in solution_3
 def solution_3(n,m):
     if n == 0 or m == 0:
         return 1
@@ -43,7 +43,7 @@ def solution_3(n,m):
     else:
         return solution_3(n-2,m) + solution_3(n,m-2) + 2*solution_3(n-1, m-1)
     
-#the same as solution_2 except keeps track of knowledge its already obtained in dictionary d
+#the same as solution_3 except keeps track of knowledge its already obtained in dictionary d
 def solution_4(n,m,d):
     if n == 0 or m == 0:
         return 1

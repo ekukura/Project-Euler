@@ -6,8 +6,6 @@ Created on Fri Jul 21 16:29:54 2017
 @author: emilykukura
 """
 import time, math
-import numpy as np
-import statistics as stats
 
 '''
 What is the smallest positive number that is 

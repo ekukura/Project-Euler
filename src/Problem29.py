@@ -25,22 +25,32 @@ and 2 ≤ b ≤ 100?
 import numpy as np
 import time, itertools, math
 
-def brute(max_a, max_b):
+#brute force
+def solution_1(max_a, max_b):
     s = set()
     for a in range(2, max_a+1):
         for b in range(2, max_b+1):
-            s = s.union({pow(a,b)})
-           # print(s)
-           
-    return s
+            s = s.union({pow(a,b)})      
+              
+    return len(s)
 
-#so a = k^p, so since k < a, already accounted for some of a^b = (k)^p*b
-#this function returns the number you HAVENT accounted for 
-#(knowing that p is the highest power s.t. a = k^p)
-def get_num_new(p): #assumed max b = M_b = 100, and M_a = 100. General version needs M_a, M_b as inputs
 
-    if p == 2:
-        n = 49 #(49 = 50-1)
+########################################################################
+# NOTE: For this helper function for solution_2, 
+# it is assumed max b = M_b = 100 
+# General version needs M_a, M_b as inputs.
+# This version is just to help get intuition for the general version
+########################################################################
+# Here we have a = k^p, so since k < a, already accounted for some of 
+# a^b = (k)^p*b (since loop over a-values is in increasing order).
+# This function returns the number you HAVENT accounted for 
+# (knowing that p is the highest power s.t. a = k^p)
+def get_num_new(p): 
+
+    if p == 2: 
+        # a = k^2, so a^b = k^(2*b); since k < a, have already
+        # accounted for k^b' for b' = 2b, where b = 2...50
+        n = 49 #(49 = 50-1) # n is the number we HAVE accounted for already
         
     elif p == 3: 
         #floor(100/3) = 33, so accounted for AT LEAST k^(3*b) for 2 <= b <= 33
@@ -48,7 +58,8 @@ def get_num_new(p): #assumed max b = M_b = 100, and M_a = 100. General version n
             # -- e.g. the even b betwen 34 and 66
         m3 = 33
         n2 = math.floor((66-34)/2) + 1
-        n = m3-1 + n2 #32 numbers between 2 and 33 #should NOT add 32 + 17 = 49 (50)
+        n = m3-1 + n2 #32 numbers between 2 and 33 
+        #should NOT add 32 + 17 = 49 (new: 50)
 
     elif p == 4:   
         #floor(100/4) = 25, so accounted for AT LEAST k^(4*b) for 2 <= b <= 25
@@ -59,7 +70,7 @@ def get_num_new(p): #assumed max b = M_b = 100, and M_a = 100. General version n
         m4 = 25
         n2 = 25
         n3 = math.floor((75 - 51)/3) + 1
-        n = (m4-1) + n2 + n3  #should NOT add 49 + 9 = 58 (99-58 = 41)
+        n = (m4-1) + n2 + n3  #should NOT add 49 + 9 = 58 (new: 99-58 = 41)
 
     elif p == 5:
         #floor(100/5) = 20, so accounted for AT LEAST k^(5*b) for 2 <= b <= 20
@@ -82,8 +93,9 @@ def get_num_new(p): #assumed max b = M_b = 100, and M_a = 100. General version n
         n2 = math.floor((40-21)/2) + 1 #10
         n3 = math.floor((60 - 41)/3) + 1 + 4 #7 + 4 = 11
         n4 = math.floor((80 - 61)/4) + 1 + 3 #5 + 3 = 8
-        n = (m5-1) + n2 + n3 + n4  #19 + 10 + 11 + 8 = 48 (51)
-        
+        n = (m5-1) + n2 + n3 + n4  #19 + 10 + 11 + 8 = 48 (new: 51)
+      
+    # only need to check up to p = 6 b/c 2 = min(a_values) and 2^7 = 128 > 100  
     elif p == 6:
         #floor(100/6) = 16, so accounted for AT LEAST k^(6*b) for 2 <= b <= 16
         #also need to determine when already counted (k^2)^(3)b (17<=b<=33) 
@@ -103,12 +115,13 @@ def get_num_new(p): #assumed max b = M_b = 100, and M_a = 100. General version n
         n3 = 50 - 33
         n4 = math.floor((66 - 51)/2) + 1  #8
         n5 = math.floor((83 - 67)/5) + 2 #5
-        n = (m6-1) + n2 + n3 + n4 + n5 # 49 + 13 = 62 (37)
+        n = (m6-1) + n2 + n3 + n4 + n5 # 49 + 13 = 62 (new: 37)
     
     #print("returning {}...".format(99-n))
-    return 100 - 1 - n #100 = M_a
+    return 100 - 1 - n #100 = M_b 
+
         
-def opt(M_a, M_b):
+def solution_2(M_a):
     total = 0
     for a in range(2,M_a+1):
         #print("a = ", a)
@@ -134,31 +147,42 @@ def opt(M_a, M_b):
             
     return total
 
- #so a = k^p, so since k < a, already accounted for some of a^b = (k)^p*b
-#this function returns the number you HAVENT accounted for 
-#(knowing that p is the highest power s.t. a = k^p)
-def get_num_new_gen(p, M_a, M_b): 
+
+# Here a = k^p, so since k < a, already accounted for some of a^b = (k)^p*b.
+# %his function returns the number you HAVENT accounted for 
+# (knowing that p is the highest power s.t. a = k^p)
+def get_num_new_gen(p, M_b): 
     #print("get_num_new_gen called with arguments p = {}, M_a = {}, M_b = {}".format(p, M_a, M_b))
-    #Have a = k^p = (k^l)^(p/l)*b for 1<=l<=p-1
-    unaccounted = {i for i in range(2,M_b+1)}
-    #n_accounted = [0 for i in range(p)] # n_accounted[j] = those accounted for by k^j but NOT by k^i for i < j. by conv. acc[0] = 0
+    # Have a = k^p = (k^l)^(p/l) where for 1<=l<=p-1,since k^l < k^p, we
+    # have already accounted for some of a^b = (k^l)^(p*b/l)
+    unaccounted = {i for i in range(2,M_b+1)} 
+    # at first assume haven't acounted for any yet; then remove ones found to 
+    # have been already accounted for
     for l in range(1,p): #looking at (k^l)^(p/l)*b in this loop
     #first put p/l in reduced form
-        #if x = gcd(l,p), p/l = (p/x)/(l/x) and (p/x, l/x) = (p',l') are co-prime
+        #if x = gcd(l,p), p/l = (p/x)/(l/x) = (p',l'), and (p',l') are co-prime
         x = math.gcd(l,p) # (k^l)^(p'/l')*b 
-        max_mult = int(math.floor(M_b/(p/l)))
-        d = int(l/x)
-        #since p',l' coprime (p'/l')*b an integer <> p'*b mult of l' <> b mult of l' = d
-        to_remove = {j*d for j in range(1, int(max_mult/d) + 1)}
+        #max_b_val, below, is the maximum b s.t. (p/l)*b <= M_b
+        max_b_val = int(math.floor(M_b/(p/l)))
+        l_prime = int(l/x) # since x is the gcd of l and p, x divides l, so 
+        # we already know l/x is an integer, but this conversion just ensures that
+        # it is interpreted as such by python
+        
+        # since p',l' coprime (p'/l')*b an integer <> p'*b mult of l' <> b mult of l'
+        # Thus since a^b = (k^l)^(p'/l')*b already accounted for <> (p'/l')*b an integer,
+        # we have that a^b = (k^l)^(p'/l')*b already accounted for  <> b mult of l'
+        # <> b = j*l' for 1 <= j <= floor(max_b_val/l')
+        to_remove = {j*l_prime for j in range(1, int(max_b_val/l_prime) + 1)}
         unaccounted = unaccounted - to_remove
-        #print("for l = {}, x = {}, max_mult = {}, d = {}\n".format(l,x,max_mult,d))
+        #print("for l = {}, x = {}, max_b_val = {}, l_prime = {}\n".format(l,x,max_b_val,l_prime))
         #print("removing:\n{}\n".format(to_remove))
         #print("unaccounted = ", unaccounted)
    
     return len(unaccounted)           
 
-       
-def opt_gen(M_a, M_b):
+
+# General solution for any M_a, M_b  
+def solution_3(M_a, M_b):
     total = 0
     for a in range(2,M_a+1):
         #print("a = ", a)
@@ -172,9 +196,9 @@ def opt_gen(M_a, M_b):
             if k.is_integer(): #then a = k^p, and p is the LARGEST such power
                 #print("for a = {} and p = {}, k = {}".format(a,p,k))
                 power_found = True
-                to_add = get_num_new_gen(p, M_a, M_b)
+                to_add = get_num_new_gen(p, M_b)
                 #print("adding {}...".format(to_add))
-                total += to_add #right now assumed M_b = 100
+                total += to_add 
             else: #check next lowest power
                 p -= 1
                 
@@ -182,46 +206,46 @@ def opt_gen(M_a, M_b):
             #print("adding {}".format(M_a - 1))
             total += M_a - 1
             
-    return total    
+    return total  
 
+
+def solution_4(M_a, M_b):
+
+    s = set(itertools.product(range(2, M_a + 1), range(2, M_b + 1)))
+    #print(s)
+    s2 = {pow(a, b) for a, b in s}
+    #print(s2)
+    return len(s2)
     
-#'''
-m = 10240
-print("m = ", m)
+if __name__ == '__main__':
 
-num_trials = 1
-
-total_opt = 0
-total_brute = 0
-
-for i in range(num_trials):
+    num = 100
+    #num = 10240
+    print("num = ", num)
     
+    #'''don't do this one for num >= 120 (at 120 takes ~4.5 s)
     start = time.time()
-    res = opt_gen(m,m)
+    res_1 = solution_1(num, num)
     end = time.time()
-    total_opt += end - start
-
-print("The answer is {}\nTook {} seconds".format(res, total_opt/num_trials))
-
-#start = time.time()
-#res = opt(m,m)
-#end = time.time()
-#print("The answer is {}\nTook {} seconds".format(res, end-start))
-
-'''
-for i in range(num_trials):
+    print("res_1 = {}\nTook {} seconds".format(res_1, end-start))  
+    # for num = 100, takes ~1.6 s
+    #'''
     
+    # print(solution_2(100))
+    # Note solution_2 IS NOT GENERAL. Requires num = 100 (max_b = 100 specifically is what is required)
+        
     start = time.time()
-    res = len(brute(m,m))
+    res_3 = solution_3(num, num)
     end = time.time()
-    total_brute += end - start
+    print("res_3 = {}\nTook {} seconds".format(res_3, end-start))   
+    # for num = 100, takes ~0.00048 s
+    
+    #'''don't do this one for num >= 800 (at 800 takes ~4.8 s)'
+    start = time.time()
+    res_4 = solution_4(num, num)
+    end = time.time()
+    print("res_4 = {}\nTook {} seconds".format(res_4, end-start))    
+    # for num = 100, takes ~0.011 s 
+    #'''
 
-print("The answer is {}\nTook {} seconds".format(res, total_brute/num_trials))
-'''
-#'''
-
-#s = set(itertools.product(range(2,6), repeat=2))
-#print(s)
-
-
-
+    
