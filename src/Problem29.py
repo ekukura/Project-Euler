@@ -247,5 +247,7 @@ if __name__ == '__main__':
     print("res_4 = {}\nTook {} seconds".format(res_4, end-start))    
     # for num = 100, takes ~0.011 s 
     #'''
+    
+    # Answer: 9183
 
     
