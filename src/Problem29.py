@@ -216,6 +216,8 @@ def solution_4(M_a, M_b):
     s2 = {pow(a, b) for a, b in s}
     #print(s2)
     return len(s2)
+
+
     
 if __name__ == '__main__':
 
