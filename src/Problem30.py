@@ -82,7 +82,7 @@ def solution_1(p):
     -->        x not equal to sum_pow(x,p)
     
 
-    Let f(p) = 10^(ceil(log10(p)) - (ceil(log10(p)) + 1).
+    Let f(p) = 10^(ceil(log10(p)) - ceil(log10(p)).
     There are two cases:
         (Case 1) p < f(p)
         (Case 2) p >= f(p)
@@ -90,7 +90,7 @@ def solution_1(p):
     I claim that in case (1), n(x) > n( (9^p)*n(x) ) whenever n(x) >= (p+1) + ceil(log10(p))
             while in case (2), n(x) > n( (9^p)*n(x) ) whenever n(x) >= (p+2) + ceil(log10(p))
    
-    For example, for p = 4, this holds for n(x) >= 6, since 4 = p < f(p) = 10^(1) - (2) = 8:
+    For example, for p = 4, this holds for n(x) >= 6, since 4 = p < f(p) = 10^(1) - (1) = 9:
 
     To prove the special case p = 4 we have:
         sum_pow(x,4) <= (9^4)*n(x) < 10^4 * n(x) = 10^(4 + log10(n(x))
@@ -116,44 +116,46 @@ def solution_1(p):
     Thus:
         floor( log10( (9^p)*n(x))) + 1 < floor( p + log10(n(x))) + 1 = (p+1) + floor(log10(n(x))
     ->     n(sum_pow(x,p)) <= n( (9^p)*n(x) ) < (p+1) + log10(n(x)). 
-        Thus for any x s.t. (p+1) + log10(n(x)) < n(x), we have  n(sum_pow(x,p)) < n(x) 
+        Thus for any x s.t. (p+1) + log10(n(x)) <= n(x), we have  n(sum_pow(x,p)) < n(x) 
             and thus sum_pow(x,p) < x
         
     So it suffices to show that:
-        (Case 1) When p < f(p),  (p+1) + log10(n(x)) < n(x) for all n(x) >= (p+1) + ceil(log10(p))       
-        (Case 2) When p >= f(p),  (p+1) + log10(n(x)) < n(x) for all n(x) >= (p+2) + ceil(log10(p))         
+        (Case 1) When p < f(p),  (p+1) + log10(n(x)) <= n(x) for all n(x) >= (p+1) + ceil(log10(p))       
+        (Case 2) When p >= f(p),  (p+1) + log10(n(x)) <= n(x) for all n(x) >= (p+2) + ceil(log10(p))         
 
-    Let m = n(x), so that we want to show (p+1) + log10(m) < m for m sufficiently large.
+    Let m = n(x), so that we want to show (p+1) + log10(m) <= m for m sufficiently large.
     
     
     **Proof**: First note that the following statements are equivalent:
     
-        - (p+1) + log10(m) < m  
-        - 10^((p+1) + log10(m)) < 10^m  
-        - (10^(p+1))*m < 10^m
-        - m < 10^(m-(p+1))
+        - (p+1) + log10(m) <= m  
+        - 10^((p+1) + log10(m)) <= 10^m  
+        - (10^(p+1))*m <= 10^m
+        - m <= 10^(m-(p+1))
             
         This it suffices to show that for all m sufficiently large, 
-            m < 10^(m-(p+1)), which we will show by induction for both of the two cases:
+            m <= 10^(m-(p+1)), which we will show by induction for both of the two cases:
         
-        Case 1: p < f(p) = 10^(ceil(log10(p)) - (ceil(log10(p)) + 1)
+        Case 1: p < f(p) = 10^(ceil(log10(p)) - ceil(log10(p)) 
+            *Note since f(p) is an integer, this means p+1 <= f(p)
         
         Base (m = (p+1) + ceil(log10(p))):
-            Since p < f(p): 
+            Since p+1 <= f(p): 
             m = (p+1) + ceil(log10(p)) 
-                < 10^(ceil(log10(p)) - (ceil(log10(p)) + 1) + 1 + ceil(log10(p))
+                <= f(p) + ceil(log10(p))
+                = 10^(ceil(log10(p)) - ceil(log10(p)) + ceil(log10(p))
                 = 10^(ceil(log10(p)) 
                 = 10 ^ ( (p+1) + ceil(log10(p)) - (p+1) ) 
                 = 10^(m-(p+1)). Done.
             
-        Then inductively: Assume m < 10^(m-(p+1)) for a fixed p.
-            (m+1) < 10^(m-(p+1)) + 1 
-                < 10*10^(m-(p+1))  (since for all r>=1, r+1 <= 10*r, and 10^(m-(p+1)) >= 1 since m > (p+1))
+        Then inductively: Assume m <= 10^(m-(p+1)) for a fixed p.
+            (m+1) <= 10^(m-(p+1)) + 1 
+                <= 10*10^(m-(p+1))  (since for all r>=1, r+1 <= 10*r, and 10^(m-(p+1)) >= 1 since m > (p+1))
                 = 10^((m+1) - (p+1)). Done.
                 
         Note this inductive argument will be the same for Case 2 as well, and so all that
         is left is proving the base case for Case 2,
-        when p >= f(p) = 10^(ceil(log10(p)) - (ceil(log10(p)) + 1):
+        when p >= f(p) = 10^(ceil(log10(p)) - (ceil(log10(p))):
         
         Base (m = (p+2) + ceil(log10(p))):
             m = (p+2) + ceil(log10(p)) 
@@ -197,9 +199,7 @@ if __name__ == '__main__':
     
     ns = get_satisfying_n_digit_numbers_brute(4, 4)
     print(ns)
-        
-    #res = solution_1()
-    #print(res)
+
     #'''
     
     p = 5
