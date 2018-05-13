@@ -478,29 +478,30 @@ if __name__ == '__main__':
     
     p = 5
     
-   #============================================================================
-   #  start = time.time()
-   #  res_1 = solution_1(p)
-   #  end = time.time()
-   #  print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
-   #     
-   #  start = time.time()
-   #  res_2 = solution_2(p)
-   #  end = time.time()
-   #  print("res_2 = {}\nTook {} seconds".format(res_2, end-start))    
-   #  
-   #  start = time.time()
-   #  res_3 = solution_3(p)
-   #  end = time.time()
-   #  print("res_3 = {}\nTook {} seconds".format(res_3, end-start))    
-   #  #Answer: 443839
-   # 
-   #  start = time.time()
-   #  res_4 = solution_4(p)
-   #  end = time.time()
-   #  print("res_4 = {}\nTook {} seconds".format(res_4, end-start))    
-   #  
-   #============================================================================
+    start = time.time()
+    res_1 = solution_1(p)
+    end = time.time()
+    print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
+        
+    #===========================================================================
+    # start = time.time()
+    # res_2 = solution_2(p)
+    # end = time.time()
+    # print("res_2 = {}\nTook {} seconds".format(res_2, end-start))    
+    #===========================================================================
+     
+    start = time.time()
+    res_3 = solution_3(p)
+    end = time.time()
+    print("res_3 = {}\nTook {} seconds".format(res_3, end-start))    
+    
+    #===========================================================================
+    # start = time.time()
+    # res_4 = solution_4(p)
+    # end = time.time()
+    # print("res_4 = {}\nTook {} seconds".format(res_4, end-start))    
+    #===========================================================================
+     
    
     start = time.time()
     res_5 = solution_5(p)
@@ -511,11 +512,11 @@ if __name__ == '__main__':
     res_6 = solution_6(p)
     end = time.time()
     print("res_6 = {}\nTook {} seconds".format(res_6, end-start))          
+    
     #Answer: 443839 
     
     
-    
-    
+       
     
     
     '''
@@ -580,3 +581,5 @@ if __name__ == '__main__':
     
     #print(6*pow(9,5)) 
     #print(math.floor(6*pow(9,5)/pow(10,6-1)))
+    
+    #print([pow(k,4) for k in range(10)])
