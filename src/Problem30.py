@@ -261,7 +261,7 @@ def solution_2(p):
         satisfying_numbers.extend(cur_values)
         #print("For {}-digit numbers, found {}\n".format(num_digits, cur_values))
       
-    #print(satisfying_numbers)
+    print(satisfying_numbers)
     res = sum(satisfying_numbers)
     
     return res
@@ -359,8 +359,8 @@ def get_satisfying_n_digit_numbers_4(n, p, p_powers):
 
 
 def solution_4(p): 
-    '''
-    Description...
+    '''  
+    TODO: Add Description...
     '''
     p_powers = [pow(k,p) for k in range(10)]
     #print("leading terms:", leading_terms)
@@ -376,23 +376,77 @@ def solution_4(p):
     res = sum(satisfying_numbers)
     
     return res
+
+def get_satisfying_n_digit_numbers_5(n, p, p_powers):
+    '''
+    Explanation...
+    '''
+    satisfying_nums = [] 
+    #max_digit_mag = min(math.ceil(math.pow(math.pow(10,n), 1/p)) - 1,9) 
+    max_first_digit_mag = min(math.floor(n*pow(9,p)/pow(10,n-1)),9)
+
+    for first_digit in range(1, max_first_digit_mag + 1):
+        upper_bound = pow(10, n-1)*(first_digit + 1) #any number with this first digit is smaller than this
+        max_remaining_mag = math.ceil(pow(upper_bound, 1/p)) - 1 
+        if max_remaining_mag < 9: 
+            remainders = get_nums_with_max_digit_mag(n-1, max_remaining_mag)
+            #print("for n = {}, p = {}, and first_digit = {}, ".format(n,p,first_digit) + 
+            #      "max_rem_mag = {}".format(max_remaining_mag))
+            #and remainders is: {}\n".format(remainders))
+                
+            for cur_rem in remainders:
+                cand = pow(10,n-1)*first_digit + cur_rem
+                cur_sum = sum_pow_dict(cand,p,p_powers)
+                if cur_sum == cand:
+                    satisfying_nums.append(cur_sum)
+                    #print("p = {}, n = {}, first_digit = {}, cur_rem = {}, cand = {}".format(p, n, first_digit, cur_rem, cand))
+            
+        else: #no need to check with original limit (max_digit_mag) 
+                # -- if no limit here then this limit was also >= 9
+                # so check all numbers
+            for cur_rem in range(pow(10, n-2), pow(10, n-1) - 1):
+                cand = pow(10,n-1)*first_digit + cur_rem
+                cur_sum = sum_pow_dict(cand,p,p_powers)
+                if cur_sum == cand:
+                    satisfying_nums.append(cur_sum)
+
+   
+    return satisfying_nums
+
+def solution_5(p): 
+    '''  
+    TODO: Add Description...
+    '''
+    p_powers = [pow(k,p) for k in range(10)]
+    #print("leading terms:", leading_terms)
+    max_digits = get_highest_num_digits(p) #e.g. max_digits = 5 when p = 4
+    satisfying_numbers = []
+    for num_digits in range(2, max_digits + 1):
+        #find all x s.t. n(x) = num_digits and x = sum_four(x)
+        cur_values = get_satisfying_n_digit_numbers_5(num_digits, p, p_powers)
+        satisfying_numbers.extend(cur_values)
+        #print("For {}-digit numbers, found {}\n".format(num_digits, cur_values))
+      
+    print(satisfying_numbers)
+    res = sum(satisfying_numbers)
+    
+    return res
+ 
       
 
 if __name__ == '__main__':
     
     p = 5
     
-    #===========================================================================
-    # start = time.time()
-    # res_1 = solution_1(p)
-    # end = time.time()
-    # print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
-    #   
-    # start = time.time()
-    # res_2 = solution_2(p)
-    # end = time.time()
-    # print("res_2 = {}\nTook {} seconds".format(res_2, end-start))    
-    #===========================================================================
+    start = time.time()
+    res_1 = solution_1(p)
+    end = time.time()
+    print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
+       
+    start = time.time()
+    res_2 = solution_2(p)
+    end = time.time()
+    print("res_2 = {}\nTook {} seconds".format(res_2, end-start))    
     
     start = time.time()
     res_3 = solution_3(p)
@@ -403,7 +457,13 @@ if __name__ == '__main__':
     start = time.time()
     res_4 = solution_4(p)
     end = time.time()
-    print("res_4 = {}\nTook {} seconds".format(res_3, end-start))    
+    print("res_4 = {}\nTook {} seconds".format(res_4, end-start))    
+    
+    start = time.time()
+    res_5 = solution_5(p)
+    end = time.time()
+    print("res_5 = {}\nTook {} seconds".format(res_5, end-start))  
+         
     #Answer: 443839 
     
     
@@ -468,4 +528,8 @@ if __name__ == '__main__':
     #print(get_nums_with_max_digit_mag(2, 3))
     #leading_terms = [math.floor((p_powers[k] + 1)/pow(10,n-1)) for k in range(10)]
     #===========================================================================
+   
+    # For Solution 5:
     
+    #print(6*pow(9,5)) 
+    #print(math.floor(6*pow(9,5)/pow(10,6-1)))
