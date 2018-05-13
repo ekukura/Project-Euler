@@ -413,6 +413,7 @@ def get_satisfying_n_digit_numbers_5(n, p, p_powers):
    
     return satisfying_nums
 
+
 def solution_5(p): 
     '''  
     TODO: Add Description...
@@ -432,38 +433,84 @@ def solution_5(p):
     
     return res
  
+
+def get_satisfying_n_digit_numbers_6(n, p, p_powers):
+    '''
+    Explanation...
+    '''
+    satisfying_nums = [] 
+    #max_digit_mag = min(math.ceil(math.pow(math.pow(10,n), 1/p)) - 1,9) 
+    max_value = min(pow(10,n) - 1, n*pow(9,p))
+    
+    for cand in range(pow(10, (n-1)), max_value + 1):
+        cur_sum = sum_pow_dict(cand,p,p_powers)
+        if cur_sum == cand:
+            satisfying_nums.append(cur_sum)
+            #print("n = {}, p = {}".format(n, p))
+
+   
+    return satisfying_nums
+
+
+def solution_6(p): 
+    '''  
+    TODO: Add Description...
+    '''
+    p_powers = [pow(k,p) for k in range(10)]
+    #print("leading terms:", leading_terms)
+    max_digits = get_highest_num_digits(p) #e.g. max_digits = 5 when p = 4
+    satisfying_numbers = []
+    
+    for num_digits in range(2, max_digits + 1):
+        #find all x s.t. n(x) = num_digits and x = sum_four(x)
+        cur_values = get_satisfying_n_digit_numbers_6(num_digits, p, p_powers)
+        satisfying_numbers.extend(cur_values)
+        #print("For {}-digit numbers, found {}\n".format(num_digits, cur_values))
       
+    print(satisfying_numbers)
+    res = sum(satisfying_numbers)
+    
+    return res
+ 
+     
 
 if __name__ == '__main__':
     
     p = 5
     
-    start = time.time()
-    res_1 = solution_1(p)
-    end = time.time()
-    print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
-       
-    start = time.time()
-    res_2 = solution_2(p)
-    end = time.time()
-    print("res_2 = {}\nTook {} seconds".format(res_2, end-start))    
-    
-    start = time.time()
-    res_3 = solution_3(p)
-    end = time.time()
-    print("res_3 = {}\nTook {} seconds".format(res_3, end-start))    
-    #Answer: 443839
+   #============================================================================
+   #  start = time.time()
+   #  res_1 = solution_1(p)
+   #  end = time.time()
+   #  print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
+   #     
+   #  start = time.time()
+   #  res_2 = solution_2(p)
+   #  end = time.time()
+   #  print("res_2 = {}\nTook {} seconds".format(res_2, end-start))    
+   #  
+   #  start = time.time()
+   #  res_3 = solution_3(p)
+   #  end = time.time()
+   #  print("res_3 = {}\nTook {} seconds".format(res_3, end-start))    
+   #  #Answer: 443839
+   # 
+   #  start = time.time()
+   #  res_4 = solution_4(p)
+   #  end = time.time()
+   #  print("res_4 = {}\nTook {} seconds".format(res_4, end-start))    
+   #  
+   #============================================================================
    
-    start = time.time()
-    res_4 = solution_4(p)
-    end = time.time()
-    print("res_4 = {}\nTook {} seconds".format(res_4, end-start))    
-    
     start = time.time()
     res_5 = solution_5(p)
     end = time.time()
     print("res_5 = {}\nTook {} seconds".format(res_5, end-start))  
-         
+ 
+    start = time.time()
+    res_6 = solution_6(p)
+    end = time.time()
+    print("res_6 = {}\nTook {} seconds".format(res_6, end-start))          
     #Answer: 443839 
     
     
