@@ -266,23 +266,146 @@ def solution_2(p):
     
     return res
 
+def sum_pow_dict(num, p, p_powers):
+    '''
+    sums the p-the powers of the digits of num
+    
+    Letting n = num_digits(num), this function is O(n)
+    '''
+    num_str = str(num)
+    digits = [int(num_str[i]) for i in range(len(num_str))]
+    power_digits = [p_powers[d] for d in digits]
+    #print(digits)
+    #print(power_digits)
+    return sum(power_digits)
+
+def get_satisfying_n_digit_numbers_mag_dict(n,p,p_powers):
+    '''
+    Dealing with n-digit numbers, power-p sums.
+    If any digit has value >= log_p(10^n), then will have x < sum_pow(x,p)
+    '''
+    satisfying_nums = []
+    max_digit_mag = math.ceil(math.pow(math.pow(10,n), 1/p)) - 1
+    #print("For n = {}, p = {}, the max_digit_mag is {}".format(n,p,max_digit_mag))
+    
+    #e.g. for n = 2, p = 5, want only digits with mag <= 2 (10, 11, 12, 20, 21, 22)
+    
+    if max_digit_mag < 9:
+        candidates = get_n_digit_nums_with_max_digit_mag(n, max_digit_mag)
+    else:
+        candidates = [val for val in range(pow(10, n-1), pow(10, n) - 1)]
+        
+    for cand in candidates:
+        cur_sum = sum_pow_dict(cand,p,p_powers)
+        if cur_sum == cand:
+            satisfying_nums.append(cur_sum)
+    
+    return satisfying_nums
+
+
+def solution_3(p): 
+    '''
+    Same as soultion_2, but store all p-powers so don't have 
+    to continuously compute
+    '''
+    p_powers = [pow(k,p) for k in range(10)]
+    max_digits = get_highest_num_digits(p) #e.g. max_digits = 5 when p = 4
+    satisfying_numbers = []
+    for num_digits in range(2, max_digits + 1):
+        #find all x s.t. n(x) = num_digits and x = sum_four(x)
+        cur_values = get_satisfying_n_digit_numbers_mag_dict(num_digits, p, p_powers)
+        satisfying_numbers.extend(cur_values)
+        #print("For {}-digit numbers, found {}\n".format(num_digits, cur_values))
+      
+    print(satisfying_numbers)
+    res = sum(satisfying_numbers)
+    return res
+    
+
+def get_satisfying_n_digit_numbers_4(n, p, p_powers):
+    '''
+    Explanation...
+    '''
+    satisfying_nums = [] 
+    max_digit_mag = min(math.ceil(math.pow(math.pow(10,n), 1/p)) - 1,9) 
+  
+    #so maximum first digit is max_digit_mag
+    for first_digit in range(1, max_digit_mag + 1):
+        upper_bound = pow(10, n-1)*(first_digit + 1) #any number with this first digit is smaller than this
+        max_remaining_mag = math.ceil(pow(upper_bound, 1/p)) - 1 
+        if max_remaining_mag < 9: 
+            remainders = get_nums_with_max_digit_mag(n-1, max_remaining_mag)
+            #print("for n = {}, p = {}, and first_digit = {}, ".format(n,p,first_digit) + 
+            #      "max_rem_mag = {}".format(max_remaining_mag))
+            #and remainders is: {}\n".format(remainders))
+                
+            for cur_rem in remainders:
+                cand = pow(10,n-1)*first_digit + cur_rem
+                cur_sum = sum_pow_dict(cand,p,p_powers)
+                if cur_sum == cand:
+                    satisfying_nums.append(cur_sum)
+            
+        else: #no need to check with original limit (max_digit_mag) 
+                # -- if no limit here then this limit was also >= 9
+                # so check all numbers
+            for cur_rem in range(pow(10, n-2), pow(10, n-1) - 1):
+                cand = pow(10,n-1)*first_digit + cur_rem
+                cur_sum = sum_pow_dict(cand,p,p_powers)
+                if cur_sum == cand:
+                    satisfying_nums.append(cur_sum)
+
+   
+    return satisfying_nums
+
+
+def solution_4(p): 
+    '''
+    Description...
+    '''
+    p_powers = [pow(k,p) for k in range(10)]
+    #print("leading terms:", leading_terms)
+    max_digits = get_highest_num_digits(p) #e.g. max_digits = 5 when p = 4
+    satisfying_numbers = []
+    for num_digits in range(2, max_digits + 1):
+        #find all x s.t. n(x) = num_digits and x = sum_four(x)
+        cur_values = get_satisfying_n_digit_numbers_4(num_digits, p, p_powers)
+        satisfying_numbers.extend(cur_values)
+        #print("For {}-digit numbers, found {}\n".format(num_digits, cur_values))
+      
+    print(satisfying_numbers)
+    res = sum(satisfying_numbers)
+    
+    return res
+      
 
 if __name__ == '__main__':
     
+    p = 5
     
-    p = 4
+    #===========================================================================
+    # start = time.time()
+    # res_1 = solution_1(p)
+    # end = time.time()
+    # print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
+    #   
+    # start = time.time()
+    # res_2 = solution_2(p)
+    # end = time.time()
+    # print("res_2 = {}\nTook {} seconds".format(res_2, end-start))    
+    #===========================================================================
     
     start = time.time()
-    res_1 = solution_1(p)
+    res_3 = solution_3(p)
     end = time.time()
-    print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
-      
-    start = time.time()
-    res_2 = solution_2(p)
-    end = time.time()
-    print("res_2 = {}\nTook {} seconds".format(res_2, end-start))    
-    
+    print("res_3 = {}\nTook {} seconds".format(res_3, end-start))    
     #Answer: 443839
+   
+    start = time.time()
+    res_4 = solution_4(p)
+    end = time.time()
+    print("res_4 = {}\nTook {} seconds".format(res_3, end-start))    
+    #Answer: 443839 
+    
     
     
     
@@ -324,5 +447,25 @@ if __name__ == '__main__':
     # print(get_satisfying_n_digit_numbers_mag(3,5))  
     # print(get_satisfying_n_digit_numbers_mag(2,3))
     # print(get_satisfying_n_digit_numbers_mag(3,6))      
+    #===========================================================================
+    
+    # For Solution 3:
+    #===========================================================================
+    # p = 3
+    # p_powers = [pow(k,p) for k in range(10)]
+    # print(sum_pow_dict(1295, p, p_powers))
+    #===========================================================================
+
+
+    # For Solution 4:
+    #===========================================================================
+    #p4 = [pow(k,4) for k in range(10)]
+    # p5 = [pow(k,5) for k in range(10)]
+    # print(p5)
+    #for n = 3, p = 4
+    #print([math.floor((p4[k] + 1)/pow(10,2)) for k in range(10)])
+    #print(math.ceil(pow(600, 1/4)))
+    #print(get_nums_with_max_digit_mag(2, 3))
+    #leading_terms = [math.floor((p_powers[k] + 1)/pow(10,n-1)) for k in range(10)]
     #===========================================================================
     
