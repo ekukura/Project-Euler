@@ -17,7 +17,7 @@ Find the sum of all the numbers that can be written as the sum of fifth powers o
 Answer:
 443839
 '''
-import math, time
+import math, time, itertools
 
 def sum_pow(num, p):
     '''
@@ -182,11 +182,118 @@ def solution_1(p):
     return res
 
 
-if __name__ == '__main__':
-
+def get_nums_with_max_digit_mag(n, max_digit_mag):
     '''
+    :returns: any <= n digit numbers whose digits are all <= max_digit_mag in magnitude
+    '''
+    list_nums = [ list(v) for v in itertools.product(range(max_digit_mag + 1), repeat = n)]
+    vals = [sum(pow(10,i) * list_num[i] for i in range(n)) for list_num in list_nums]
+   
+    return vals
+
+
+def get_n_digit_nums_with_max_digit_mag(n, max_digit_mag):
+    
+    remainders = get_nums_with_max_digit_mag(n-1, max_digit_mag)
+    vals = []
+    for first_digit in range(1, max_digit_mag + 1):
+        #here we need to generate all n-digit numbers starting with first_digit
+        # should be ((max_mag)+1)^(n-1) such numbers
+        vals.extend([pow(10,n-1)*first_digit + r for r in remainders])            
+    
+    return vals
+
+
+def get_satisfying_n_digit_numbers_mag(n,p):
+    '''
+    Dealing with n-digit numbers, power-p sums.
+    If any digit has value >= log_p(10^n), then will have x < sum_pow(x,p)
+    '''
+    satisfying_nums = []
+    max_digit_mag = math.ceil(math.pow(math.pow(10,n), 1/p)) - 1
+    #print("For n = {}, p = {}, the max_digit_mag is {}".format(n,p,max_digit_mag))
+    
+    #e.g. for n = 2, p = 5, want only digits with mag <= 2 (10, 11, 12, 20, 21, 22)
+    
+    if max_digit_mag < 9:
+        candidates = get_n_digit_nums_with_max_digit_mag(n, max_digit_mag)
+    else:
+        candidates = [val for val in range(pow(10, n-1), pow(10, n) - 1)]
+        
+    for cand in candidates:
+        cur_sum = sum_pow(cand,p)
+        if cur_sum == cand:
+            satisfying_nums.append(cur_sum)
+    
+    return satisfying_nums
+
+
+def solution_2(p):
+    '''
+    In solution_1, we found an upper bound on the digit-length of a feasible candidate, 
+    which depended on the value of p (e.g. when p = 5, only need to consider
+    x with no more than 6 digits
+    
+    Now, for each digit length, we can use p also to determine an upper bound on the 
+    magnitude of feasible candidates. 
+    
+    Let di = di(x) be the digit of x in the i-th place, e.g. if x = 534, then
+    d2 = 5, d1 = 3, and d0 = 4.
+    
+    Then since always x < 10^(n(x)), if di^p >= 10^(n(x)) for any di, then 
+    x < di^p < sum_pow(x,p).
+    
+    For example, when p = 5:
+        When n(x) = 2 we have that x < 100 for all x, and so there is no need 
+            to consider any 2-digit number with a digit of magnitude >= 3,
+            since 3^5 = 243 > 99.
+        When n(x) = 3, x < 1000 for all x, and so no need to consider any 
+            3-digit number with a digit of magnitude >= 5, since 5^5 = 3125 > 999
+        When n(x) = 4, x < 10^4 for all x, and so no need to consider any 
+            3-digit number with a digit of magnitude >= 7, since 5^7 = 16807 > 9999
+            
+    '''
+    max_digits = get_highest_num_digits(p) #e.g. max_digits = 5 when p = 4
+    satisfying_numbers = []
+    for num_digits in range(2, max_digits + 1):
+        #find all x s.t. n(x) = num_digits and x = sum_four(x)
+        cur_values = get_satisfying_n_digit_numbers_mag(num_digits, p)
+        satisfying_numbers.extend(cur_values)
+        #print("For {}-digit numbers, found {}\n".format(num_digits, cur_values))
+      
+    #print(satisfying_numbers)
+    res = sum(satisfying_numbers)
+    
+    return res
+
+
+if __name__ == '__main__':
+    
+    
+    p = 4
+    
+    start = time.time()
+    res_1 = solution_1(p)
+    end = time.time()
+    print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
+      
+    start = time.time()
+    res_2 = solution_2(p)
+    end = time.time()
+    print("res_2 = {}\nTook {} seconds".format(res_2, end-start))    
+    
+    #Answer: 443839
+    
+    
+    
+    
+    
+    '''
+    
     #testing supplementary methods:
     
+    For Solution 1:
+        
     r = get_highest_num_digits(995)
     #print(r)
 
@@ -201,11 +308,21 @@ if __name__ == '__main__':
     print(ns)
 
     #'''
+ 
+
+    # For Solution 2
     
-    p = 5
-    start = time.time()
-    res_1 = solution_1(p)
-    end = time.time()
-    print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
+    #print(get_nums_with_max_digit_mag(2, 2))
+    #print(get_nums_with_max_digit_mag(3, 2))
+    #print(get_nums_with_max_digit_mag(2, 4))    
     
-    #Answer: 443839
+    #print(get_n_digit_nums_with_max_digit_mag(3, 2))
+
+    # print(get_highest_num_digits(5))
+    # print(log_p(100,5))
+    # print(get_satisfying_n_digit_numbers_mag(2,5))
+    # print(get_satisfying_n_digit_numbers_mag(3,5))  
+    # print(get_satisfying_n_digit_numbers_mag(2,3))
+    # print(get_satisfying_n_digit_numbers_mag(3,6))      
+    #===========================================================================
+    
