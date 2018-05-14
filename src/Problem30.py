@@ -324,7 +324,15 @@ def solution_3(p):
 
 def get_satisfying_n_digit_numbers_4(n, p, p_powers):
     '''
-    Explanation...
+    Adds level to solution_3 by looking at possible remaining digit magnitudes AFTER the first digit is seen. 
+    This is implemented in the lines:
+        upper_bound = pow(10, n-1)*(first_digit + 1) #any number with this first digit is smaller than this
+        max_remaining_mag = math.ceil(pow(upper_bound, 1/p)) - 1 
+     
+     e.g. when n = 4 and p = 4, if the first digit of x is 1 then x < 2000 (this is the value of upper_bound above),
+     and so there is no need any x which has a remaining digit d s.t. d^p >= 2000 (e.g. in this case since 
+     7^4 = 2401 > 2000, x cannot have any remaining digits with values 7, 8, or 9, since then sum_pow(x,4) >= 2000 > x
+    
     '''
     satisfying_nums = [] 
     max_digit_mag = min(math.ceil(math.pow(math.pow(10,n), 1/p)) - 1,9) 
@@ -360,7 +368,7 @@ def get_satisfying_n_digit_numbers_4(n, p, p_powers):
 
 def solution_4(p): 
     '''  
-    TODO: Add Description...
+    see explanation in get_satisfying_n_digit_numbers_4 to see how this differs from solution 3
     '''
     p_powers = [pow(k,p) for k in range(10)]
     #print("leading terms:", leading_terms)
@@ -379,8 +387,19 @@ def solution_4(p):
 
 def get_satisfying_n_digit_numbers_5(n, p, p_powers):
     '''
-    Explanation...
+    What seperates this from solution_4 is the line
+    max_first_digit_mag = min(math.floor(n*pow(9,p)/pow(10,n-1)),9), whereas in 4 we just have:
+    
+    max_digit_mag = min(math.ceil(math.pow(math.pow(10,n), 1/p)) - 1,9), which is just a general upper
+    bound on any of the digits magnitudes based on n and p (since if there is a d with d^p > 10^n, the sum
+    will necessarily be too big)
+    
+    This method in addition takes into account that sum_pow(x,p) < n*(9^p), so there is no need to
+    check ANY number with a value > n*(9^p), (and if the first digit of x is > the first digit of n*(9^p)
+    then we necessarily have x > n*(9^p) > sum_pow(x,p)
+    
     '''
+    
     satisfying_nums = [] 
     #max_digit_mag = min(math.ceil(math.pow(math.pow(10,n), 1/p)) - 1,9) 
     max_first_digit_mag = min(math.floor(n*pow(9,p)/pow(10,n-1)),9)
@@ -416,7 +435,7 @@ def get_satisfying_n_digit_numbers_5(n, p, p_powers):
 
 def solution_5(p): 
     '''  
-    TODO: Add Description...
+    See get_satisfying_n_digit_numbers_5 for explanation of difference between this and solution_4
     '''
     p_powers = [pow(k,p) for k in range(10)]
     #print("leading terms:", leading_terms)
@@ -436,7 +455,8 @@ def solution_5(p):
 
 def get_satisfying_n_digit_numbers_6(n, p, p_powers):
     '''
-    Explanation...
+    For x with n digits, sum_pow(x,p) <= n*pow(9,p). Thus there is no need to check any x > n*pow(9,p). 
+    This solution uses only this fact and the p_powers dict to get the n-digit numbers s.t. x = sum_pow(x,p)
     '''
     satisfying_nums = [] 
     #max_digit_mag = min(math.ceil(math.pow(math.pow(10,n), 1/p)) - 1,9) 
@@ -454,8 +474,11 @@ def get_satisfying_n_digit_numbers_6(n, p, p_powers):
 
 def solution_6(p): 
     '''  
-    TODO: Add Description...
+    Here we use the p_powers dictionary first introduced in solution_3, the upper bound on the 
+    possible number of digits calculated in the first solution, and the fact that an
+    n-digit number x must have sum_pow(x,p) <= n*(9^n) to find our solution
     '''
+    
     p_powers = [pow(k,p) for k in range(10)]
     #print("leading terms:", leading_terms)
     max_digits = get_highest_num_digits(p) #e.g. max_digits = 5 when p = 4
@@ -472,16 +495,134 @@ def solution_6(p):
     
     return res
  
-     
+ 
+def get_n_sets(min_val, n): #returns n-sets with values between min_val and 9, inclusive
+    
+    assert(n >= 1)
+    assert(type(n) == int)
+    
+    res = []
+    if n == 1:
+        res = [[i] for i in range(min_val, 10)]
+    else:
+        for digit in range(min_val, 10):
+            remainders = get_n_sets(digit, n-1)
+            for remainder in remainders:           
+                cur_digits = [digit]
+                cur_digits.extend(remainder)
+                res.append(cur_digits)
+            
+    return res
+
+
+def matches(cur_sum, digits):
+    '''
+    :type digits: list
+    
+    returns true IFF cur_sum = r for some rearrangement r of the digits in digit set
+    e.g. matches(132, [2,1,3]) = True
+    while matches(353, [1,3,5]) = False
+    '''
+    
+    #if not same length then CANT match
+    if not len(str(cur_sum)) == len(digits):
+        return False
+    
+    determined_not_perm = False
+    while len(digits) > 0 and not determined_not_perm:
+        cur_digit = cur_sum % 10 #picks off last digit
+        if cur_digit in digits:
+            digits.remove(cur_digit)
+            cur_sum = int((cur_sum - cur_digit)/10)
+        else:
+            determined_not_perm = True
+            
+    return not determined_not_perm
+
+
+def get_satisfying_n_digit_numbers_7(n, p_powers):
+    '''
+    Calculates satisfying n-digit numbers using fact that for each set of n-digits (in the range 0 through 9),
+    we only have one possible p-power sum, so we only need to check against one value
+    
+    For example, for the digit set {3,5,2}, if p = 3 we have that the sum of the p-powers of the digits is
+    3^3 + 5^3 + 2^3 = 27 + 125 + 8 = 160. Thus we only need to compare to see if the 160 is a rearrangement of 
+    the digits {3,5,2} (Which it is not), whereas in old methods we were essentially checking for each
+    re-arrangement of 3,5,2 (e.g. 235, 253, 325, 352, 523, 532) if the sum of the p-powers of the digits was
+    equal to the value, thus needlessly computing the sum 2^3 + 3^3 + 5^3 6 times.
+    
+    In general for an n-digit number, if all the digits are distinct we compute the p-power sum n! times, 
+    while here we just compute it once.
+    
+    To get an idea of the savings, consider that for n = 6 and p = 5:
+    
+    There are 10^6 - 10^5 = 900,000 6-digit numbers, and in old methods we would (potentially) iterate 
+    through all these. Even using the cut-offs from solution 6 we would iterate through 
+    6*(9^5) - 10^5 = 254,294 numbers. 
+    
+    Here however we will instead iterate through 5005 = len(get_n_sets(0,6)) = the number of distinct 
+    n-multisets of {0,1,2,3,4,5,6,7,8,9} = (10+n-1) choose n (e.g. this is the number of degree
+    n monomials in the variables {x_0, ... , x_9} ... think stars and bars with n stars and 10-1 bars
+    to see why this is then (10+n-1) choose n values)
+    
+    '''
+    
+    satisfying_nums = [] 
+    
+    cur_sum = 0
+    digit_sets = get_n_sets(0,n)
+    for digit_set in digit_sets: #[e.g. digit_set = [1,5,6]
+        cur_sum = sum(p_powers[d] for d in digit_set)   
+        if matches(cur_sum, digit_set):
+            satisfying_nums.append(cur_sum)
+
+   
+    return satisfying_nums
+
+def solution_7(p):
+    '''  
+    Here we study the sum_pow(x,p) values. 
+    
+    Note that for an n-digit number x, for any number r which has the same digits as x but in a different order
+    (e.g. its digits are a rearrangement of the digits of x, so if we let d(x) be the set of digits in x, 
+    then we have d(x) = d(r)), we have sum_pow(x,p) = sum_pow(r,p).
+    
+    In other words, each set of n-digits uniquely defines a p-power sum. 
+    For a given set of digits d, call this unique sum digit_sum_pow(d,p). 
+    So digit_sum_pow(d,p) = sum_pow(x,p) for any x s.t. d(x) = d.
+    
+    Thus we can iterate through all possible n-sets (where each value in the set is in {0,...,9})
+    and calculate this sum. Then we can check if the sum is equal to any re-arrangement of the digits
+    
+    See description of get_satisfying_n_digit_numbers_7 for more details
+    '''
+    
+    p_powers = [pow(k,p) for k in range(10)]
+    #print("leading terms:", leading_terms)
+    max_digits = get_highest_num_digits(p) #e.g. max_digits = 5 when p = 4
+    satisfying_numbers = []
+    
+    for num_digits in range(2, max_digits + 1):
+        #find all x s.t. n(x) = num_digits and x = sum_four(x)
+        cur_values = get_satisfying_n_digit_numbers_7(num_digits, p_powers)
+        satisfying_numbers.extend(cur_values)
+        #print("For {}-digit numbers, found {}\n".format(num_digits, cur_values))
+      
+    print(satisfying_numbers)
+    res = sum(satisfying_numbers)
+    
+    return res
+
 
 if __name__ == '__main__':
     
-    p = 5
+    p = 4
     
     start = time.time()
     res_1 = solution_1(p)
     end = time.time()
     print("res_1 = {}\nTook {} seconds".format(res_1, end-start))    
+    #For p = 5 takes ~6.133 s
         
     #===========================================================================
     # start = time.time()
@@ -494,27 +635,33 @@ if __name__ == '__main__':
     res_3 = solution_3(p)
     end = time.time()
     print("res_3 = {}\nTook {} seconds".format(res_3, end-start))    
+    #For p = 5 takes ~3.998 s
     
-    #===========================================================================
-    # start = time.time()
-    # res_4 = solution_4(p)
-    # end = time.time()
-    # print("res_4 = {}\nTook {} seconds".format(res_4, end-start))    
-    #===========================================================================
-     
+    start = time.time()
+    res_4 = solution_4(p)
+    end = time.time()
+    print("res_4 = {}\nTook {} seconds".format(res_4, end-start))    
+      
    
     start = time.time()
     res_5 = solution_5(p)
     end = time.time()
     print("res_5 = {}\nTook {} seconds".format(res_5, end-start))  
- 
+    #For p = 5 takes ~1.532 s
+    
     start = time.time()
     res_6 = solution_6(p)
     end = time.time()
     print("res_6 = {}\nTook {} seconds".format(res_6, end-start))          
+    #For p = 5 takes 1.317s
     
+    start = time.time()
+    res_7 = solution_7(p)
+    end = time.time()
+    print("res_7 = {}\nTook {} seconds".format(res_7, end-start))  
+    #For p = 5 takes 0.029s
+         
     #Answer: 443839 
-    
     
        
     
@@ -583,3 +730,57 @@ if __name__ == '__main__':
     #print(math.floor(6*pow(9,5)/pow(10,6-1)))
     
     #print([pow(k,4) for k in range(10)])
+    
+    
+    #For Solution 7:
+    #a = {v for v in range(0, 10)}
+    #print(a)
+    #res = [[i] for i in range(0, 10)]
+    #res = {(0,1,2), (3,4,5)}
+    #print(res)
+    #res = get_n_sets(0,2)
+    #for val in res:
+    #    print(val)
+    #===========================================================================
+    # print(len(res))
+    # p_powers = [pow(k,3) for k in range(10)]
+    # for digit_set in res:
+    #     print(digit_set)
+    #     r = sum(p_powers[d] for d in digit_set)   
+    #     print(r)
+    #===========================================================================
+    #print(9*10/2) #= 10 choose 2
+    #for i in range(10)
+        #for j in range(i, 10) 
+            #for k in range(j), 10)
+            
+    #===========================================================================
+    # 
+    # print(sum(i*(10-i+1) for i in range(1,11)))
+    #===========================================================================
+    # for n in range(1,10):
+    #     res = get_n_sets(0,n)
+    #     print(n, len(res), pow(10+n-1,n)/(math.factorial(n)))
+    #===========================================================================
+    #===========================================================================
+    #===========================================================================
+    # print(matches(213, [1,2,3]))
+    # print(matches(313, [1,2,3]))    
+    # print(matches(133, [3,1,3]))
+    # print(matches(135235, [5,3,1,3,2,5]))    
+    # print(matches(335235, [5,3,1,3,2,5]))    
+    # print(matches(0, [0,0]))
+    #===========================================================================
+    
+    #e.g. for n = 6:
+    #===========================================================================
+    # print(pow(10,6))
+    # res = get_n_sets(0,6)
+    # print(len(res))
+    # print(6*pow(9,5) - pow(10,5))
+    # 
+    # from scipy.misc import comb
+    # print(comb(15,6))
+    # print(comb(12,3))
+    #===========================================================================
+        
